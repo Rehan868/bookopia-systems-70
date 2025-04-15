@@ -1,4 +1,3 @@
-
 // Mock data for the entire application
 // This file serves as a central repository for all mock data used across the application
 
@@ -283,11 +282,11 @@ export const users = [
 // Owners
 export const owners = [
   {
-    id: "o1",
-    name: "John Owner",
-    email: "jowner@example.com",
+    id: "1",
+    name: "John Miller",
+    email: "john.miller@example.com",
     phone: "+1 (555) 123-9876",
-    properties: 2,
+    properties: 3,
     revenue: 75000,
     occupancy: 85,
     avatar: "/placeholder.svg",
@@ -299,11 +298,11 @@ export const owners = [
     joinedDate: "2022-01-15"
   },
   {
-    id: "o2",
-    name: "Sarah Property",
-    email: "sproperty@example.com",
+    id: "2",
+    name: "Sarah Wilson",
+    email: "sarah.wilson@example.com",
     phone: "+1 (555) 234-8765",
-    properties: 1,
+    properties: 2,
     revenue: 45000,
     occupancy: 75,
     avatar: null,
@@ -315,9 +314,9 @@ export const owners = [
     joinedDate: "2022-03-10"
   },
   {
-    id: "o3",
-    name: "Investment Group LLC",
-    email: "contact@investgroup.example.com",
+    id: "3",
+    name: "Michael Thompson",
+    email: "michael.t@example.com",
     phone: "+1 (555) 345-7654",
     properties: 4,
     revenue: 120000,
@@ -329,6 +328,22 @@ export const owners = [
       routingNumber: "****7890"
     },
     joinedDate: "2021-11-05"
+  },
+  {
+    id: "4",
+    name: "Emily Davis",
+    email: "emily.davis@example.com",
+    phone: "+1 (555) 456-7890",
+    properties: 1,
+    revenue: 35000,
+    occupancy: 70,
+    avatar: null,
+    paymentDetails: {
+      bank: "Citibank",
+      accountNumber: "****2345",
+      routingNumber: "****6789"
+    },
+    joinedDate: "2022-06-20"
   }
 ];
 
