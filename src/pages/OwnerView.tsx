@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { useOwner } from '@/hooks/useOwners';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OwnerRoomsList } from '@/components/owners/OwnerRoomsList';
 
 const OwnerView = () => {
   const { id } = useParams<{ id: string }>();
@@ -192,6 +192,8 @@ const OwnerView = () => {
           </CardContent>
         </Card>
       </div>
+
+      <OwnerRoomsList ownerId={owner.id} />
     </div>
   );
 };

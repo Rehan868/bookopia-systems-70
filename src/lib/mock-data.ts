@@ -295,7 +295,8 @@ export const owners = [
       accountNumber: "****5678",
       routingNumber: "****9012"
     },
-    joinedDate: "2022-01-15"
+    joinedDate: "2022-01-15",
+    rooms: ["r1", "r2", "r4"]
   },
   {
     id: "2",
@@ -473,3 +474,31 @@ export const dashboardStats = {
   monthlyRevenue: 24500,
   pendingMaintenance: 2
 };
+
+// Add owner_rooms relationship data
+export const ownerRooms = [
+  {
+    id: "or1",
+    ownerId: "1",
+    roomId: "r1",
+    assignedDate: "2022-01-15"
+  },
+  {
+    id: "or2",
+    ownerId: "1",
+    roomId: "r2",
+    assignedDate: "2022-01-15"
+  },
+  {
+    id: "or3",
+    ownerId: "1",
+    roomId: "r4",
+    assignedDate: "2022-02-01"
+  },
+  {
+    id: "or4",
+    ownerId: "2",
+    roomId: "r3",
+    assignedDate: "2022-03-10"
+  }
+];

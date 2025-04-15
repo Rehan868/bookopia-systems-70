@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { OwnerRoomsList } from '@/components/owners/OwnerRoomsList';
 
 const ownerFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -59,7 +59,6 @@ const OwnerEdit = () => {
     mode: "onChange",
   });
 
-  // Update form values when owner data is loaded
   React.useEffect(() => {
     if (owner) {
       form.reset({
@@ -82,7 +81,6 @@ const OwnerEdit = () => {
     try {
       setIsSubmitting(true);
       
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
@@ -350,6 +348,8 @@ const OwnerEdit = () => {
           </form>
         </Form>
       </Card>
+
+      <OwnerRoomsList ownerId={id || ''} isEditing={true} />
     </div>
   );
 };
