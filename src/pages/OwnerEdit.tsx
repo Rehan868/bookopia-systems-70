@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useOwner } from '@/hooks/useOwners';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { 
   Form, 
   FormControl, 
@@ -15,6 +15,7 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -34,7 +35,7 @@ const ownerFormSchema = z.object({
 });
 
 const OwnerEdit = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { data: owner, isLoading, error } = useOwner(id || '');
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -103,11 +104,63 @@ const OwnerEdit = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="animate-fade-in">
+        <div className="flex items-center gap-4 mb-8">
+          <Button variant="ghost" asChild>
+            <Link to="/owners">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Owners
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Owner</h1>
+            <p className="text-muted-foreground mt-1">Loading owner information...</p>
+          </div>
+        </div>
+
+        <Card className="p-6">
+          <div className="space-y-6">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   if (error || !owner) {
-    return <div>Error loading owner</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
+        <h2 className="text-2xl font-bold text-destructive">Error Loading Owner</h2>
+        <p className="text-muted-foreground">
+          {error instanceof Error ? error.message : "Owner information could not be loaded"}
+        </p>
+        <Button asChild>
+          <Link to="/owners">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Owners List
+          </Link>
+        </Button>
+      </div>
+    );
   }
 
   return (

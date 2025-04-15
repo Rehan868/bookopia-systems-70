@@ -7,18 +7,11 @@ import { ArrowLeft, FileEdit, Building, DollarSign, Percent } from 'lucide-react
 import { useOwner } from '@/hooks/useOwners';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const OwnerView = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { data: owner, isLoading, error } = useOwner(id || '');
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error || !owner) {
-    return <div>Error loading owner details</div>;
-  }
 
   const getInitials = (name: string) => {
     return name
@@ -36,6 +29,79 @@ const OwnerView = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  if (isLoading) {
+    return (
+      <div className="animate-fade-in">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" asChild className="mr-4">
+              <Link to="/owners">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Owners
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Owner Profile</h1>
+              <p className="text-muted-foreground mt-1">Loading owner information...</p>
+            </div>
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-20 w-20 rounded-full" />
+                <div>
+                  <Skeleton className="h-8 w-48 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !owner) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
+        <h2 className="text-2xl font-bold text-destructive">Error Loading Owner</h2>
+        <p className="text-muted-foreground">
+          {error instanceof Error ? error.message : "Owner information could not be loaded"}
+        </p>
+        <Button asChild>
+          <Link to="/owners">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Owners List
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in">
