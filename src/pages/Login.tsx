@@ -123,7 +123,7 @@ const Login = () => {
         <div className="text-center text-xs text-muted-foreground">
           <p>For demo purposes, use:</p>
           <p>Email: admin@example.com</p>
-          <p>Password: password</p>
+          <p>Password: admin123</p>
         </div>
       </div>
     </div>

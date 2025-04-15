@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
-import { Sidebar as OwnerSidebar } from './OwnerSidebar';
+import { Sidebar } from './OwnerSidebar';
 import { Header } from './Header';
 
 export function OwnerLayout() {
@@ -18,7 +18,7 @@ export function OwnerLayout() {
   
   return (
     <div className="flex min-h-screen">
-      <OwnerSidebar />
+      <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 p-6 bg-background overflow-auto">
