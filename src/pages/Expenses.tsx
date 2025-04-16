@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -12,8 +11,17 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Eye, FileEdit, Loader2, Plus, Search } from 'lucide-react';
+import { Eye, FileEdit, Loader2, Plus, Search, Trash2 } from 'lucide-react';
 import { useExpenses } from '@/hooks/useExpenses';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "sonner";
 
 const Expenses = () => {
   const navigate = useNavigate();
@@ -22,19 +30,14 @@ const Expenses = () => {
   const [dateFilter, setDateFilter] = useState<string>('all');
   const { data: expenses, isLoading, error } = useExpenses();
 
-  // Filter expenses based on search query and filters
   const filteredExpenses = expenses?.filter(expense => {
-    // Search filter
     const matchesSearch = searchQuery === '' || 
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.vendor?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.property.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Category filter
     const matchesCategory = categoryFilter === 'all' || expense.category.toLowerCase() === categoryFilter.toLowerCase();
     
-    // Date filter (simplified for demo)
-    // In a real app, we'd have more complex date filtering logic
     const matchesDate = dateFilter === 'all';
     
     return matchesSearch && matchesCategory && matchesDate;
@@ -42,6 +45,18 @@ const Expenses = () => {
 
   const handleAddNew = () => {
     navigate('/expenses/add');
+  };
+
+  const handleViewExpense = (id: string) => {
+    navigate(`/expenses/${id}`);
+  };
+
+  const handleEditExpense = (id: string) => {
+    navigate(`/expenses/edit/${id}`);
+  };
+
+  const handleDeleteExpense = (id: string) => {
+    toast.success("Expense deleted successfully");
   };
 
   const getCategoryBadge = (category: string) => {
@@ -128,54 +143,73 @@ const Expenses = () => {
         </div>
       ) : (
         <div className="rounded-lg overflow-hidden border border-border">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="text-left font-medium px-6 py-3">Description</th>
-                <th className="text-left font-medium px-6 py-3">Amount</th>
-                <th className="text-left font-medium px-6 py-3">Date</th>
-                <th className="text-left font-medium px-6 py-3">Category</th>
-                <th className="text-left font-medium px-6 py-3">Property</th>
-                <th className="text-left font-medium px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <Table>
+            <TableHeader className="bg-muted">
+              <TableRow>
+                <TableHead>Description</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Property</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
               {filteredExpenses && filteredExpenses.length > 0 ? (
                 filteredExpenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-muted/50">
-                    <td className="px-6 py-4">
+                  <TableRow key={expense.id} className="hover:bg-muted/50">
+                    <TableCell>
                       <div className="font-medium">{expense.description}</div>
                       {expense.vendor && (
                         <div className="text-sm text-muted-foreground">{expense.vendor}</div>
                       )}
-                    </td>
-                    <td className="px-6 py-4 font-medium">${expense.amount.toFixed(2)}</td>
-                    <td className="px-6 py-4">{expense.date}</td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell className="font-medium">${expense.amount.toFixed(2)}</TableCell>
+                    <TableCell>{expense.date}</TableCell>
+                    <TableCell>
                       {getCategoryBadge(expense.category)}
-                    </td>
-                    <td className="px-6 py-4">{expense.property}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="ghost">
+                    </TableCell>
+                    <TableCell>{expense.property}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => handleViewExpense(expense.id)}
+                          title="View expense details"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="ghost">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => handleEditExpense(expense.id)}
+                          title="Edit expense"
+                        >
                           <FileEdit className="h-4 w-4" />
                         </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => handleDeleteExpense(expense.id)}
+                          title="Delete expense"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     No expenses found matching your filters.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
