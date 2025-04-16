@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   BarChart, 
@@ -19,15 +19,39 @@ import {
   ClipboardList
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
 
 interface NavItemProps {
   to: string;
   icon: React.ElementType;
   label: string;
   collapsed: boolean;
+  onClick?: () => void;
 }
 
-const NavItem = ({ to, icon: Icon, label, collapsed }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, label, collapsed, onClick }: NavItemProps) => {
+  if (onClick) {
+    return (
+      <Button
+        variant="ghost"
+        className={cn(
+          "flex w-full items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group justify-start",
+          collapsed ? "justify-center" : "",
+          "text-foreground/70 hover:bg-accent hover:text-foreground"
+        )}
+        onClick={onClick}
+      >
+        <Icon className={cn("h-5 w-5 transition-transform", !collapsed && "group-hover:scale-110")} />
+        {!collapsed && <span>{label}</span>}
+        {collapsed && (
+          <div className="absolute left-16 rounded-md px-2 py-1 ml-6 bg-popover text-foreground shadow-md opacity-0 -translate-x-3 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50">
+            {label}
+          </div>
+        )}
+      </Button>
+    );
+  }
+  
   return (
     <NavLink 
       to={to} 
@@ -73,6 +97,13 @@ const NavGroup = ({ title, children, collapsed }: NavGroupProps) => {
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div 
@@ -120,7 +151,13 @@ export function Sidebar() {
       </div>
       
       <div className="p-2 border-t border-border">
-        <NavItem to="/logout" icon={LogOut} label="Logout" collapsed={collapsed} />
+        <NavItem 
+          to="#" 
+          icon={LogOut} 
+          label="Logout" 
+          collapsed={collapsed} 
+          onClick={handleLogout}
+        />
       </div>
     </div>
   );

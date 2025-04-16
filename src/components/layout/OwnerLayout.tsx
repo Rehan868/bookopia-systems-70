@@ -102,6 +102,13 @@ export function OwnerLayout() {
             </NavLink>
           </nav>
         </div>
+        
+        <div className="p-6 mt-auto border-t">
+          <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Log Out
+          </Button>
+        </div>
       </div>
       
       {/* Main content */}
