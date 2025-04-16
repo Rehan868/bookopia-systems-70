@@ -79,3 +79,106 @@ export function useBookings() {
 
   return { data, isLoading, error };
 }
+
+// Add the missing useBooking hook for individual booking data
+export function useBooking(id: string) {
+  const [data, setData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    // Simulate API call with a delay
+    const fetchData = async () => {
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Find the booking with the matching ID
+        const booking = mockBookings.find(booking => booking.id === id);
+        
+        if (booking) {
+          setData(booking);
+        } else {
+          setError(new Error('Booking not found'));
+        }
+        
+        setIsLoading(false);
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  return { data, isLoading, error };
+}
+
+// Add the useTodayCheckins hook
+export function useTodayCheckins() {
+  const [data, setData] = useState<any[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    // Simulate API call with a delay
+    const fetchData = async () => {
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Filter bookings for today's check-ins
+        // In a real app, this would be done on the server
+        const today = new Date().toISOString().split('T')[0];
+        const checkins = mockBookings.filter(
+          booking => booking.check_in.split('T')[0] === today && booking.status === 'confirmed'
+        );
+        
+        setData(checkins);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return { data, isLoading, error };
+}
+
+// Add the useTodayCheckouts hook
+export function useTodayCheckouts() {
+  const [data, setData] = useState<any[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    // Simulate API call with a delay
+    const fetchData = async () => {
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Filter bookings for today's check-outs
+        // In a real app, this would be done on the server
+        const today = new Date().toISOString().split('T')[0];
+        const checkouts = mockBookings.filter(
+          booking => booking.check_out.split('T')[0] === today && booking.status === 'checked-in'
+        );
+        
+        setData(checkouts);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return { data, isLoading, error };
+}

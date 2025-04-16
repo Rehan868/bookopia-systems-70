@@ -79,3 +79,47 @@ export function useRooms() {
 
   return { data, isLoading, error };
 }
+
+// Add the missing useRoom hook for individual room data
+export function useRoom(id: string) {
+  const [data, setData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    // Simulate API call with a delay
+    const fetchData = async () => {
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Find the room with the matching ID
+        const room = mockRooms.find(room => room.id === id);
+        
+        if (room) {
+          // Add some additional mock data for the RoomDetails component
+          const enrichedRoom = {
+            ...room,
+            description: 'A spacious room with modern amenities and beautiful views.',
+            floor: room.number.charAt(0),
+            amenities: ['WiFi', 'Air Conditioning', 'Mini Bar', 'TV'],
+            updated_at: new Date().toISOString()
+          };
+          
+          setData(enrichedRoom);
+        } else {
+          setError(new Error('Room not found'));
+        }
+        
+        setIsLoading(false);
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  return { data, isLoading, error };
+}

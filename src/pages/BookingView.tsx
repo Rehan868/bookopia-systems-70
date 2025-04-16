@@ -38,7 +38,6 @@ const BookingView = () => {
     );
   }
 
-  // Remove the bookingData prop since BookingDetails doesn't expect it
   return <BookingDetails />;
 };
 
