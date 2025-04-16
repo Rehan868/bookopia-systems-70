@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -38,6 +37,7 @@ interface BookingFormData {
   status: string;
   paymentStatus: string;
   sendConfirmation: boolean;
+  guestDocument?: File | null;
 }
 
 interface AddEditBookingFormProps {
@@ -71,6 +71,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     status: bookingData?.status || 'confirmed',
     paymentStatus: bookingData?.paymentStatus || 'pending',
     sendConfirmation: bookingData?.sendConfirmation !== undefined ? bookingData.sendConfirmation : true,
+    guestDocument: null
   };
   
   const [formData, setFormData] = useState<BookingFormData>(defaultData);
@@ -81,38 +82,27 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value,
-    });
-    
-    // Recalculate financial values if base rate changes
-    if (name === 'baseRate') {
-      const baseRate = parseFloat(value) || 0;
-      const nights = getNumberOfNights();
-      const totalAmount = baseRate * nights;
-      const vat = totalAmount * 0.05; // 5% VAT
-      const tourismFee = totalAmount * 0.03; // 3% Tourism Fee
-      const commission = totalAmount * 0.1; // 10% Commission
-      const netToOwner = totalAmount - vat - tourismFee - commission;
-      
-      setFormData(prev => ({
-        ...prev,
-        totalAmount,
-        vat,
-        tourismFee,
-        commission,
-        netToOwner,
-      }));
-    }
+    }));
   };
   
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: Number(value),
-    });
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({
+        ...prev,
+        guestDocument: e.target.files![0]
+      }));
+    }
   };
   
   const handleCheckboxChange = (checked: boolean) => {
@@ -132,7 +122,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
           checkOut: range.to || range.from,
         };
         
-        // Recalculate total amount based on new dates
         if (range.to) {
           const nights = Math.round((range.to.getTime() - range.from!.getTime()) / (1000 * 60 * 60 * 24));
           const totalAmount = prev.baseRate * nights;
@@ -165,7 +154,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would send data to an API
     console.log('Submitting booking data:', formData);
     
     toast({
@@ -173,7 +161,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
       description: `The booking for ${formData.guestName} has been ${mode === 'add' ? 'created' : 'updated'} successfully.`,
     });
     
-    // Navigate back to the bookings list
     navigate('/bookings');
   };
   
@@ -188,7 +175,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
       
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Guest Information */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Guest Information</CardTitle>
@@ -259,10 +245,27 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   />
                 </div>
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="guestDocument">Guest ID/Passport</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id="guestDocument"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileChange}
+                    className="flex-1"
+                  />
+                  {formData.guestDocument && (
+                    <p className="text-sm text-muted-foreground">
+                      {formData.guestDocument.name}
+                    </p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
           
-          {/* Booking Summary */}
           <Card>
             <CardHeader>
               <CardTitle>Booking Summary</CardTitle>
@@ -348,7 +351,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
             </CardContent>
           </Card>
           
-          {/* Booking Details */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Booking Details</CardTitle>
@@ -455,7 +457,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
             </CardContent>
           </Card>
           
-          {/* Financial Details */}
           <Card>
             <CardHeader>
               <CardTitle>Financial Details</CardTitle>
@@ -477,6 +478,76 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="totalAmount">Total Amount*</Label>
+                <Input
+                  id="totalAmount"
+                  name="totalAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.totalAmount}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="commission">Commission*</Label>
+                <Input
+                  id="commission"
+                  name="commission"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.commission}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tourismFee">Tourism Fee*</Label>
+                <Input
+                  id="tourismFee"
+                  name="tourismFee"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.tourismFee}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vat">VAT*</Label>
+                <Input
+                  id="vat"
+                  name="vat"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.vat}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="netToOwner">Net To Owner*</Label>
+                <Input
+                  id="netToOwner"
+                  name="netToOwner"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.netToOwner}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="securityDeposit">Security Deposit</Label>
                 <Input
                   id="securityDeposit"
@@ -488,29 +559,9 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   onChange={handleInputChange}
                 />
               </div>
-              
-              <div className="pt-3 border-t space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Commission (10%):</span>
-                  <span>${formData.commission.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Tourism Fee (3%):</span>
-                  <span>${formData.tourismFee.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>VAT (5%):</span>
-                  <span>${formData.vat.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-medium pt-2 border-t">
-                  <span>Net to Owner:</span>
-                  <span>${formData.netToOwner.toFixed(2)}</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
           
-          {/* Notes */}
           <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>Notes</CardTitle>
@@ -528,7 +579,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
             </CardContent>
           </Card>
           
-          {/* Submit Buttons */}
           <div className="lg:col-span-3 flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={() => navigate('/bookings')}>
               Cancel
