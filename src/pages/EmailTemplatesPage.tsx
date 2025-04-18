@@ -34,7 +34,6 @@ const EmailTemplatesPage = () => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Subject</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>Last Modified</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -44,7 +43,6 @@ const EmailTemplatesPage = () => {
                 <TableRow key={template.id}>
                   <TableCell className="font-medium">{template.name}</TableCell>
                   <TableCell>{template.subject}</TableCell>
-                  <TableCell>{template.type}</TableCell>
                   <TableCell>{new Date(template.updated_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -57,7 +55,7 @@ const EmailTemplatesPage = () => {
 
               {(!templates || templates.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={4} className="text-center py-4">
                     No email templates found
                   </TableCell>
                 </TableRow>

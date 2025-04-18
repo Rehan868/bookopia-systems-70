@@ -19,6 +19,22 @@ const CleaningTasksPage = () => {
     return <div className="p-8">Error loading cleaning tasks: {(error as Error).message}</div>;
   }
 
+  // Custom function to get room number and handle potentially missing data
+  const getRoomNumber = (task: any) => {
+    if (task.rooms && task.rooms.number) {
+      return task.rooms.number;
+    }
+    return 'Unknown Room';
+  };
+
+  // Custom function to get assigned user name and handle potentially missing data
+  const getAssignedUserName = (task: any) => {
+    if (task.users && task.users.name) {
+      return task.users.name;
+    }
+    return 'Unassigned';
+  };
+
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
@@ -27,25 +43,25 @@ const CleaningTasksPage = () => {
       </div>
 
       <div className="grid gap-6">
-        {tasks && tasks.map((task) => (
+        {tasks && tasks.map((task: any) => (
           <Card key={task.id} className="overflow-hidden">
             <CardHeader className="bg-muted pb-2">
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg">
-                    Room: {task.rooms?.number || 'Unknown Room'}
+                    Room: {getRoomNumber(task)}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {new Date(task.date).toLocaleDateString()} | 
-                    Assigned to: {task.users?.name || 'Unassigned'}
+                    Assigned to: {getAssignedUserName(task)}
                   </p>
                 </div>
                 <Badge 
                   className="capitalize"
                   variant={
-                    task.status === 'completed' ? 'success' :
-                    task.status === 'in-progress' ? 'warning' :
-                    task.status === 'verified' ? 'success' :
+                    task.status === 'completed' ? 'default' :
+                    task.status === 'in-progress' ? 'secondary' :
+                    task.status === 'verified' ? 'default' :
                     task.status === 'issues' ? 'destructive' : 'outline'
                   }
                 >
