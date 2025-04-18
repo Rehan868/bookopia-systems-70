@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,12 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { CalendarIcon, Upload } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useCreateBooking } from '@/hooks/useBookings';
+import { useRooms } from '@/hooks/useRooms';
+import { useProperties } from '@/hooks/useProperties';
 
 interface BookingFormData {
   reference: string;
@@ -48,6 +52,9 @@ interface AddEditBookingFormProps {
 export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { mutate: createBooking } = useCreateBooking();
+  const { data: rooms = [] } = useRooms();
+  const { data: properties = [] } = useProperties();
   
   const defaultData: BookingFormData = {
     reference: mode === 'edit' ? bookingData?.reference || '' : `BK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -60,13 +67,13 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     checkOut: bookingData?.checkOut || new Date(new Date().setDate(new Date().getDate() + 3)),
     adults: bookingData?.adults || 2,
     children: bookingData?.children || 0,
-    baseRate: bookingData?.baseRate || 0,
-    totalAmount: bookingData?.totalAmount || 0,
-    securityDeposit: bookingData?.securityDeposit || 0,
-    commission: bookingData?.commission || 0,
-    tourismFee: bookingData?.tourismFee || 0,
-    vat: bookingData?.vat || 0,
-    netToOwner: bookingData?.netToOwner || 0,
+    baseRate: Number(bookingData?.baseRate || 0),
+    totalAmount: Number(bookingData?.totalAmount || 0),
+    securityDeposit: Number(bookingData?.securityDeposit || 0),
+    commission: Number(bookingData?.commission || 0),
+    tourismFee: Number(bookingData?.tourismFee || 0),
+    vat: Number(bookingData?.vat || 0),
+    netToOwner: Number(bookingData?.netToOwner || 0),
     notes: bookingData?.notes || '',
     status: bookingData?.status || 'confirmed',
     paymentStatus: bookingData?.paymentStatus || 'pending',
@@ -156,10 +163,39 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     
     console.log('Submitting booking data:', formData);
     
-    toast({
-      title: mode === 'add' ? "Booking Created" : "Booking Updated",
-      description: `The booking for ${formData.guestName} has been ${mode === 'add' ? 'created' : 'updated'} successfully.`,
-    });
+    if (mode === 'add') {
+      // Map form data to the format expected by the API
+      const bookingPayload = {
+        booking_number: formData.reference,
+        guest_name: formData.guestName,
+        room_id: formData.roomNumber,
+        check_in: formData.checkIn.toISOString().split('T')[0],
+        check_out: formData.checkOut.toISOString().split('T')[0],
+        amount: formData.totalAmount,
+        status: formData.status as 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show',
+        payment_status: formData.paymentStatus as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed',
+        special_requests: formData.notes,
+        adults: formData.adults,
+        children: formData.children,
+        guestEmail: formData.guestEmail,
+        guestPhone: formData.guestPhone,
+        property_id: formData.property,
+        baseRate: formData.baseRate,
+        securityDeposit: formData.securityDeposit,
+        commission: formData.commission,
+        tourismFee: formData.tourismFee,
+        vat: formData.vat,
+        netToOwner: formData.netToOwner
+      };
+      
+      createBooking(bookingPayload);
+    } else {
+      // For edit mode, we would call updateBooking here
+      toast({
+        title: "Booking Updated",
+        description: `The booking for ${formData.guestName} has been updated successfully.`,
+      });
+    }
     
     navigate('/bookings');
   };
@@ -365,8 +401,12 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                       <SelectValue placeholder="Select property" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Marina Tower">Marina Tower</SelectItem>
-                      <SelectItem value="Downtown Heights">Downtown Heights</SelectItem>
+                      {properties.map((property) => (
+                        <SelectItem key={property.id} value={property.id}>{property.name}</SelectItem>
+                      ))}
+                      {properties.length === 0 && (
+                        <SelectItem value="default" disabled>No properties available</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -377,12 +417,14 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                       <SelectValue placeholder="Select room" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="101">101</SelectItem>
-                      <SelectItem value="102">102</SelectItem>
-                      <SelectItem value="201">201</SelectItem>
-                      <SelectItem value="202">202</SelectItem>
-                      <SelectItem value="301">301</SelectItem>
-                      <SelectItem value="302">302</SelectItem>
+                      {rooms
+                        .filter(room => !formData.property || room.property_id === formData.property)
+                        .map((room) => (
+                          <SelectItem key={room.id} value={room.id}>{room.number}</SelectItem>
+                        ))}
+                      {rooms.length === 0 && (
+                        <SelectItem value="default" disabled>No rooms available</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -472,7 +514,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.baseRate}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -486,7 +528,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.totalAmount}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -500,7 +542,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.commission}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -514,7 +556,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.tourismFee}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -528,7 +570,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.vat}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -542,7 +584,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.netToOwner}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -556,7 +598,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.securityDeposit}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                 />
               </div>
             </CardContent>
