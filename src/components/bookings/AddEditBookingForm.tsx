@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useCreateBooking } from '@/hooks/useBookings';
+import { useCreateBooking, useUpdateBooking } from '@/hooks/useBookings';
 import { useRooms } from '@/hooks/useRooms';
 import { useProperties } from '@/hooks/useProperties';
 
@@ -53,6 +53,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createBooking } = useCreateBooking();
+  const { mutate: updateBooking } = useUpdateBooking();
   const { data: rooms = [] } = useRooms();
   const { data: properties = [] } = useProperties();
   
@@ -190,7 +191,33 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
       
       createBooking(bookingPayload);
     } else {
-      // For edit mode, we would call updateBooking here
+      // For edit mode with updateBooking
+      const bookingPayload = {
+        id: bookingData?.reference || '',
+        bookingData: {
+          booking_number: formData.reference,
+          guest_name: formData.guestName,
+          room_id: formData.roomNumber,
+          check_in: formData.checkIn.toISOString().split('T')[0],
+          check_out: formData.checkOut.toISOString().split('T')[0],
+          amount: formData.totalAmount,
+          status: formData.status as 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show',
+          payment_status: formData.paymentStatus as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed',
+          special_requests: formData.notes,
+          adults: formData.adults,
+          children: formData.children,
+          property_id: formData.property,
+          baseRate: formData.baseRate,
+          securityDeposit: formData.securityDeposit,
+          commission: formData.commission,
+          tourismFee: formData.tourismFee,
+          vat: formData.vat,
+          netToOwner: formData.netToOwner
+        }
+      };
+      
+      updateBooking(bookingPayload);
+      
       toast({
         title: "Booking Updated",
         description: `The booking for ${formData.guestName} has been updated successfully.`,
@@ -332,7 +359,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                 <div className="space-y-3 pt-3 border-t">
                   <div className="flex justify-between text-sm">
                     <span>Base Rate:</span>
-                    <span>${formData.baseRate.toFixed(2)}</span>
+                    <span>${Number(formData.baseRate).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Nights:</span>
@@ -340,18 +367,18 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   </div>
                   <div className="flex justify-between font-medium">
                     <span>Total Amount:</span>
-                    <span>${formData.totalAmount.toFixed(2)}</span>
+                    <span>${Number(formData.totalAmount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Security Deposit:</span>
-                    <span>${formData.securityDeposit.toFixed(2)}</span>
+                    <span>${Number(formData.securityDeposit).toFixed(2)}</span>
                   </div>
                 </div>
                 
                 <div className="pt-3 border-t space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Grand Total:</span>
-                    <span>${(formData.totalAmount + formData.securityDeposit).toFixed(2)}</span>
+                    <span>${(Number(formData.totalAmount) + Number(formData.securityDeposit)).toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between text-sm">
@@ -401,10 +428,10 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                       <SelectValue placeholder="Select property" />
                     </SelectTrigger>
                     <SelectContent>
-                      {properties.map((property) => (
+                      {properties && properties.map((property) => (
                         <SelectItem key={property.id} value={property.id}>{property.name}</SelectItem>
                       ))}
-                      {properties.length === 0 && (
+                      {!properties || properties.length === 0 && (
                         <SelectItem value="default" disabled>No properties available</SelectItem>
                       )}
                     </SelectContent>
@@ -417,12 +444,12 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                       <SelectValue placeholder="Select room" />
                     </SelectTrigger>
                     <SelectContent>
-                      {rooms
+                      {rooms && rooms
                         .filter(room => !formData.property || room.property_id === formData.property)
                         .map((room) => (
                           <SelectItem key={room.id} value={room.id}>{room.number}</SelectItem>
                         ))}
-                      {rooms.length === 0 && (
+                      {(!rooms || rooms.length === 0) && (
                         <SelectItem value="default" disabled>No rooms available</SelectItem>
                       )}
                     </SelectContent>
