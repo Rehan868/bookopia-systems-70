@@ -29,18 +29,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log('Auth state changed:', event);
         setSession(currentSession);
         
         // Extend the user with additional properties if needed
         if (currentSession?.user) {
           // In a real app, you would fetch the user's role from the database
-          // For now, we'll just mock it with admin role and a name
-          const extendedUser: User = {
-            ...currentSession.user,
-            role: 'admin', // Mock role
-            name: currentSession.user.email?.split('@')[0] || 'User', // Mock name
+          // Fetch additional user data from our users table
+          const fetchUserData = async () => {
+            try {
+              const { data, error } = await supabase
+                .from('users')
+                .select('name, role, status')
+                .eq('id', currentSession.user.id)
+                .single();
+                
+              if (error) {
+                console.error('Error fetching user data:', error);
+                // Use default values if we can't fetch from database
+                const extendedUser: User = {
+                  ...currentSession.user,
+                  role: 'staff',
+                  name: currentSession.user.email?.split('@')[0] || 'User',
+                };
+                setUser(extendedUser);
+                return;
+              }
+              
+              if (data) {
+                const extendedUser: User = {
+                  ...currentSession.user,
+                  role: data.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest',
+                  name: data.name || currentSession.user.email?.split('@')[0] || 'User',
+                };
+                setUser(extendedUser);
+              }
+            } catch (err) {
+              console.error('Error in fetchUserData:', err);
+              // Use default values if we can't fetch from database
+              const extendedUser: User = {
+                ...currentSession.user,
+                role: 'staff',
+                name: currentSession.user.email?.split('@')[0] || 'User',
+              };
+              setUser(extendedUser);
+            }
           };
-          setUser(extendedUser);
+          
+          // Use setTimeout to avoid calling Supabase functions directly inside the callback
+          setTimeout(fetchUserData, 0);
         } else {
           setUser(null);
         }
@@ -55,13 +92,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Extend the user with additional properties if needed
       if (currentSession?.user) {
-        // In a real app, you would fetch the user's role from the database
-        const extendedUser: User = {
-          ...currentSession.user,
-          role: 'admin', // Mock role for now
-          name: currentSession.user.email?.split('@')[0] || 'User', // Mock name
+        // Fetch additional user data from our users table
+        const fetchUserData = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('name, role, status')
+              .eq('id', currentSession.user.id)
+              .single();
+              
+            if (error) {
+              console.error('Error fetching user data:', error);
+              // Use default values if we can't fetch from database
+              const extendedUser: User = {
+                ...currentSession.user,
+                role: 'staff',
+                name: currentSession.user.email?.split('@')[0] || 'User',
+              };
+              setUser(extendedUser);
+              return;
+            }
+            
+            if (data) {
+              const extendedUser: User = {
+                ...currentSession.user,
+                role: data.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest',
+                name: data.name || currentSession.user.email?.split('@')[0] || 'User',
+              };
+              setUser(extendedUser);
+            }
+          } catch (err) {
+            console.error('Error in fetchUserData:', err);
+            // Use default values if we can't fetch from database
+            const extendedUser: User = {
+              ...currentSession.user,
+              role: 'staff',
+              name: currentSession.user.email?.split('@')[0] || 'User',
+            };
+            setUser(extendedUser);
+          }
         };
-        setUser(extendedUser);
+        
+        fetchUserData();
       } else {
         setUser(null);
       }

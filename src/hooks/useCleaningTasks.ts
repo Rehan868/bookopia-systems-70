@@ -3,12 +3,40 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchCleaningTasks, updateCleaningTaskStatus, createCleaningTask } from '@/services/api';
 import { useToast } from './use-toast';
 import { CleaningTask } from '@/services/supabase-types';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 export const useCleaningTasks = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     queryKey: ['cleaning-tasks'],
     queryFn: fetchCleaningTasks
   });
+  
+  // Set up realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('table-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cleaning_tasks'
+        },
+        () => {
+          console.log('Cleaning tasks table changed, invalidating query cache');
+          queryClient.invalidateQueries({ queryKey: ['cleaning-tasks'] });
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+  
+  return query;
 };
 
 export const useUpdateCleaningTaskStatus = () => {

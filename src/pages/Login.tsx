@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,7 +21,18 @@ export default function Login() {
     if (isAuthenticated) {
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Check if we have auth errors from URL params
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      toast({
+        title: "Authentication Error",
+        description: error,
+        variant: "destructive"
+      });
+    }
+  }, [isAuthenticated, navigate, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +49,13 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      await login(email, password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
       toast({
         title: "Success!",
         description: "You have successfully logged in."
@@ -95,6 +113,15 @@ export default function Login() {
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
+            
+            <div className="text-center mt-4">
+              <p className="text-sm text-muted-foreground">
+                Demo credentials:
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Email: staff@example.com | Password: password123
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>

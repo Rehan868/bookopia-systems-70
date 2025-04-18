@@ -2,12 +2,41 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchEmailTemplates, createEmailTemplate } from '@/services/api';
 import { useToast } from './use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
+import { EmailTemplate } from '@/services/supabase-types';
 
 export const useEmailTemplates = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     queryKey: ['email-templates'],
     queryFn: fetchEmailTemplates
   });
+  
+  // Set up realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('table-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'email_templates'
+        },
+        () => {
+          console.log('Email templates table changed, invalidating query cache');
+          queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+  
+  return query;
 };
 
 export const useEmailTemplate = (id: string) => {
@@ -34,7 +63,7 @@ export const useCreateEmailTemplate = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: (templateData: any) => {
+    mutationFn: (templateData: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>) => {
       return createEmailTemplate(templateData);
     },
     onSuccess: () => {

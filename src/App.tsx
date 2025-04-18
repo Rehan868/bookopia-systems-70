@@ -1,185 +1,147 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/hooks/use-auth';
+import { Toaster } from '@/components/ui/toaster';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ProtectedRoute from '@/components/ProtectedRoute';
+
+// Pages
 import Dashboard from '@/pages/Dashboard';
-import Bookings from '@/pages/Bookings';
-import Rooms from '@/pages/Rooms';
-import Users from '@/pages/Users';
-import Owners from '@/pages/Owners';
-import Expenses from '@/pages/Expenses';
-import Settings from '@/pages/Settings';
-import { BookingDetails } from '@/components/bookings/BookingDetails';
-import BookingAdd from '@/pages/BookingAdd';
-import BookingEdit from '@/pages/BookingEdit';
-import RoomAdd from '@/pages/RoomAdd';
-import RoomEdit from '@/pages/RoomEdit';
 import Login from '@/pages/Login';
+import Register from '@/pages/Register';
 import OwnerLogin from '@/pages/OwnerLogin';
+import PropertiesPage from '@/pages/PropertiesPage';
+import BookingsPage from '@/pages/BookingsPage';
+import BookingAdd from '@/pages/BookingAdd';
+import BookingView from '@/pages/BookingView';
+import BookingEdit from '@/pages/BookingEdit';
 import CleaningTasksPage from '@/pages/CleaningTasksPage';
 import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
-import PropertiesPage from '@/pages/PropertiesPage';
+import OwnerDashboard from '@/pages/OwnerDashboard';
+import OwnerCleaningStatus from '@/pages/OwnerCleaningStatus';
+import OwnerBookings from '@/pages/OwnerBookings';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      retry: 1,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 function App() {
   return (
-    <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppContent />
+        <Router>
+          <Routes>
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/owner/login" element={<OwnerLogin />} />
+            
+            {/* Protected Staff Routes */}
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/properties" 
+              element={
+                <ProtectedRoute>
+                  <PropertiesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookings" 
+              element={
+                <ProtectedRoute>
+                  <BookingsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookings/add" 
+              element={
+                <ProtectedRoute>
+                  <BookingAdd />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookings/:id" 
+              element={
+                <ProtectedRoute>
+                  <BookingView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookings/edit/:id" 
+              element={
+                <ProtectedRoute>
+                  <BookingEdit />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/cleaning-tasks" 
+              element={
+                <ProtectedRoute>
+                  <CleaningTasksPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/email-templates" 
+              element={
+                <ProtectedRoute>
+                  <EmailTemplatesPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Protected Owner Routes */}
+            <Route 
+              path="/owner/dashboard" 
+              element={
+                <ProtectedRoute ownerOnly>
+                  <OwnerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/cleaning" 
+              element={
+                <ProtectedRoute ownerOnly>
+                  <OwnerCleaningStatus />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/bookings" 
+              element={
+                <ProtectedRoute ownerOnly>
+                  <OwnerBookings />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Default route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <Toaster />
+        </Router>
       </AuthProvider>
-    </BrowserRouter>
-  );
-}
-
-function AppContent() {
-  const { isAuthenticated, user } = useAuth();
-
-  // Define a function to check if the user has the required role
-  const hasRequiredRole = (requiredRoles: string[]) => {
-    return user && user.role && requiredRoles.includes(user.role);
-  };
-
-  // Custom route component to protect routes based on authentication and roles
-  const PrivateRoute = ({ children, requiredRoles }: { children: React.ReactNode; requiredRoles?: string[] }) => {
-    if (!isAuthenticated) {
-      // Redirect to login if not authenticated
-      return <Navigate to="/login" />;
-    }
-
-    if (requiredRoles && !hasRequiredRole(requiredRoles)) {
-      // Redirect to a "unauthorized" page or a default page if the role is not authorized
-      return <Navigate to="/unauthorized" />;
-    }
-
-    return children;
-  };
-
-  return (
-    <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-      <Route path="/owner/login" element={<OwnerLogin />} />
-      <Route path="/unauthorized" element={<div>Unauthorized</div>} />
-
-      {/* Define routes that require authentication */}
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/bookings"
-        element={
-          <PrivateRoute>
-            <Bookings />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/bookings/:id"
-        element={
-          <PrivateRoute>
-            <BookingDetails />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/bookings/add"
-        element={
-          <PrivateRoute>
-            <BookingAdd />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/bookings/:id/edit"
-        element={
-          <PrivateRoute>
-            <BookingEdit />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/rooms"
-        element={
-          <PrivateRoute>
-            <Rooms />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/rooms/add"
-        element={
-          <PrivateRoute>
-            <RoomAdd />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/rooms/:id/edit"
-        element={
-          <PrivateRoute>
-            <RoomEdit />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/users"
-        element={
-          <PrivateRoute requiredRoles={['admin']}>
-            <Users />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/owners"
-        element={
-          <PrivateRoute requiredRoles={['admin']}>
-            <Owners />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/expenses"
-        element={
-          <PrivateRoute>
-            <Expenses />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/cleaning-tasks"
-        element={
-          <PrivateRoute>
-            <CleaningTasksPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/email-templates"
-        element={
-          <PrivateRoute>
-            <EmailTemplatesPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/properties"
-        element={
-          <PrivateRoute>
-            <PropertiesPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <PrivateRoute>
-            <Settings />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
+    </QueryClientProvider>
   );
 }
 
