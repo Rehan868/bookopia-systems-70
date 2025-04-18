@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import Dashboard from '@/pages/Dashboard';
@@ -6,17 +7,17 @@ import Rooms from '@/pages/Rooms';
 import Users from '@/pages/Users';
 import Owners from '@/pages/Owners';
 import Expenses from '@/pages/Expenses';
-import CleaningTasks from '@/pages/CleaningTasks';
 import Settings from '@/pages/Settings';
-import BookingDetails from '@/components/bookings/BookingDetails';
+import { BookingDetails } from '@/components/bookings/BookingDetails';
 import BookingAdd from '@/pages/BookingAdd';
 import BookingEdit from '@/pages/BookingEdit';
 import RoomAdd from '@/pages/RoomAdd';
 import RoomEdit from '@/pages/RoomEdit';
 import Login from '@/pages/Login';
 import OwnerLogin from '@/pages/OwnerLogin';
-import EmailTemplates from '@/pages/EmailTemplates';
-import Properties from '@/pages/Properties';
+import CleaningTasksPage from '@/pages/CleaningTasksPage';
+import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
+import PropertiesPage from '@/pages/PropertiesPage';
 
 function App() {
   return (
@@ -33,7 +34,7 @@ function AppContent() {
 
   // Define a function to check if the user has the required role
   const hasRequiredRole = (requiredRoles: string[]) => {
-    return user && requiredRoles.includes(user.role);
+    return user && user.role && requiredRoles.includes(user.role);
   };
 
   // Custom route component to protect routes based on authentication and roles
@@ -150,23 +151,23 @@ function AppContent() {
         path="/cleaning-tasks"
         element={
           <PrivateRoute>
-            <CleaningTasks />
+            <CleaningTasksPage />
           </PrivateRoute>
         }
       />
-       <Route
+      <Route
         path="/email-templates"
         element={
           <PrivateRoute>
-            <EmailTemplates />
+            <EmailTemplatesPage />
           </PrivateRoute>
         }
       />
-       <Route
+      <Route
         path="/properties"
         element={
           <PrivateRoute>
-            <Properties />
+            <PropertiesPage />
           </PrivateRoute>
         }
       />
