@@ -229,16 +229,9 @@ export const updateCleaningTaskStatus = async (id: string, status: 'pending' | '
 
 // Create functions
 export const createBooking = async (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking> => {
-  // Ensure status and payment_status are valid enum values
-  const payload = {
-    ...bookingData,
-    payment_status: (bookingData.payment_status || 'pending') as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed',
-    status: (bookingData.status || 'confirmed') as 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show'
-  };
-
   const { data, error } = await supabase
     .from('bookings')
-    .insert(payload)
+    .insert(bookingData)
     .select()
     .single();
   
@@ -266,20 +259,9 @@ export const createRoom = async (roomData: Omit<Room, 'id' | 'created_at' | 'upd
 };
 
 export const createExpense = async (expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>): Promise<Expense> => {
-  // Map any custom fields to the database fields
-  const dbExpense = {
-    description: expenseData.description,
-    amount: expenseData.amount,
-    date: expenseData.date,
-    category: expenseData.category,
-    payment_method: expenseData.payment_method || expenseData.paymentMethod,
-    status: expenseData.status,
-    property_id: expenseData.property_id
-  };
-
   const { data, error } = await supabase
     .from('expenses')
-    .insert(dbExpense)
+    .insert(expenseData)
     .select()
     .single();
   
@@ -313,15 +295,9 @@ export const createCleaningTask = async (taskData: Omit<CleaningTask, 'id' | 'cr
 };
 
 export const createUser = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> => {
-  // Cast the role to ensure it's one of the allowed enum values
-  const payload = {
-    ...userData,
-    role: userData.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest'
-  };
-
   const { data, error } = await supabase
     .from('users')
-    .insert(payload)
+    .insert(userData)
     .select()
     .single();
   
