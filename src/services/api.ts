@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Room, 
@@ -189,7 +190,8 @@ export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => 
   return data || [];
 };
 
-export const updateBookingStatus = async (id: string, status: string): Promise<void> => {
+// Fixed the type for updateBookingStatus to use a proper enum type
+export const updateBookingStatus = async (id: string, status: 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show'): Promise<void> => {
   const { error } = await supabase
     .from('bookings')
     .update({ status })
@@ -201,7 +203,8 @@ export const updateBookingStatus = async (id: string, status: string): Promise<v
   }
 };
 
-export const updateRoomStatus = async (id: string, status: string): Promise<void> => {
+// Fixed the type for updateRoomStatus to use a proper enum type
+export const updateRoomStatus = async (id: string, status: 'available' | 'occupied' | 'cleaning' | 'maintenance' | 'out-of-order'): Promise<void> => {
   const { error } = await supabase
     .from('rooms')
     .update({ status })
@@ -213,7 +216,8 @@ export const updateRoomStatus = async (id: string, status: string): Promise<void
   }
 };
 
-export const updateCleaningTaskStatus = async (id: string, status: string): Promise<void> => {
+// Fixed the type for updateCleaningTaskStatus to use a proper enum type
+export const updateCleaningTaskStatus = async (id: string, status: 'pending' | 'in-progress' | 'completed' | 'verified' | 'issues'): Promise<void> => {
   const { error } = await supabase
     .from('cleaning_tasks')
     .update({ status })
@@ -221,6 +225,232 @@ export const updateCleaningTaskStatus = async (id: string, status: string): Prom
   
   if (error) {
     console.error(`Error updating cleaning task status for ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Add functions for creating new data
+export const createBooking = async (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking> => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .insert(bookingData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating booking:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createRoom = async (roomData: Omit<Room, 'id' | 'created_at' | 'updated_at'>): Promise<Room> => {
+  const { data, error } = await supabase
+    .from('rooms')
+    .insert(roomData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating room:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createExpense = async (expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>): Promise<Expense> => {
+  const { data, error } = await supabase
+    .from('expenses')
+    .insert(expenseData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating expense:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createCleaningTask = async (taskData: Omit<CleaningTask, 'id' | 'created_at' | 'updated_at'>): Promise<CleaningTask> => {
+  const { data, error } = await supabase
+    .from('cleaning_tasks')
+    .insert(taskData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating cleaning task:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createUser = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> => {
+  const { data, error } = await supabase
+    .from('users')
+    .insert(userData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createOwner = async (ownerData: Omit<Owner, 'id' | 'created_at' | 'updated_at'>): Promise<Owner> => {
+  const { data, error } = await supabase
+    .from('owners')
+    .insert(ownerData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating owner:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createProperty = async (propertyData: any): Promise<any> => {
+  const { data, error } = await supabase
+    .from('properties')
+    .insert(propertyData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating property:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const createEmailTemplate = async (templateData: any): Promise<any> => {
+  const { data, error } = await supabase
+    .from('email_templates')
+    .insert(templateData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating email template:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const fetchAuditLogs = async (): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching audit logs:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+export const fetchEmailTemplates = async (): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('email_templates')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching email templates:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+export const fetchProperties = async (): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching properties:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+// Function to update an existing booking
+export const updateBooking = async (id: string, bookingData: Partial<Booking>): Promise<void> => {
+  const { error } = await supabase
+    .from('bookings')
+    .update(bookingData)
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error updating booking with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Function to update an existing room
+export const updateRoom = async (id: string, roomData: Partial<Room>): Promise<void> => {
+  const { error } = await supabase
+    .from('rooms')
+    .update(roomData)
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error updating room with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Function to update an existing expense
+export const updateExpense = async (id: string, expenseData: Partial<Expense>): Promise<void> => {
+  const { error } = await supabase
+    .from('expenses')
+    .update(expenseData)
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error updating expense with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Function to update an existing user
+export const updateUser = async (id: string, userData: Partial<User>): Promise<void> => {
+  const { error } = await supabase
+    .from('users')
+    .update(userData)
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error updating user with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Function to update an existing owner
+export const updateOwner = async (id: string, ownerData: Partial<Owner>): Promise<void> => {
+  const { error } = await supabase
+    .from('owners')
+    .update(ownerData)
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error updating owner with ID ${id}:`, error);
     throw error;
   }
 };
