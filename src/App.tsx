@@ -12,7 +12,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import OwnerLogin from '@/pages/OwnerLogin';
 import PropertiesPage from '@/pages/PropertiesPage';
-import BookingsPage from '@/pages/BookingsPage';
+import BookingsPage from '@/pages/BookingsPage';  // This import now matches the renamed file
 import BookingAdd from '@/pages/BookingAdd';
 import BookingView from '@/pages/BookingView';
 import BookingEdit from '@/pages/BookingEdit';

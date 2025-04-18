@@ -78,7 +78,7 @@ export default function Register() {
           toast({
             title: "Warning",
             description: "Account created but there was an error setting up your profile.",
-            variant: "warning"
+            variant: "destructive"  // Changed from "warning" to "destructive"
           });
         }
       }
