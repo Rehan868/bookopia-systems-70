@@ -1,20 +1,23 @@
+
 export type Room = {
   id: string;
   number: string;
   type: string;
   capacity: number;
   rate: number;
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'available' | 'occupied' | 'maintenance' | 'cleaning' | 'out-of-order';
   floor: string;
   description: string | null;
   amenities: string[];
   features: any;
   created_at: string;
   updated_at: string;
-  property?: string; // Adding property field as it's used in RoomList component
-  maintenance?: boolean; // Adding maintenance field used in other components
-  lastCleaned?: string; // Adding lastCleaned field
-  nextCheckIn?: string | null; // Adding nextCheckIn field
+  property_id?: string; 
+  property?: string; 
+  maintenance?: boolean; 
+  lastCleaned?: string; 
+  nextCheckIn?: string | null; 
+  room_type_id?: string;
 };
 
 export type Booking = {
@@ -30,7 +33,22 @@ export type Booking = {
   special_requests: string | null;
   created_at: string;
   updated_at: string;
-  rooms?: any; // Adding rooms property that comes from join queries
+  rooms?: any; 
+  adults?: number;
+  children?: number;
+  guestEmail?: string;
+  guestPhone?: string;
+  guestDocument?: string;
+  baseRate?: number;
+  securityDeposit?: number;
+  commission?: number;
+  tourismFee?: number;
+  vat?: number;
+  netToOwner?: number;
+  notes?: string;
+  property_id?: string;
+  guest_id?: string;
+  created_by?: string;
 };
 
 export type User = {
@@ -43,6 +61,7 @@ export type User = {
   last_active: string | null;
   created_at: string;
   updated_at: string;
+  avatar?: string; // Added for compatibility with existing components
 };
 
 export type Owner = {
@@ -65,6 +84,12 @@ export type Expense = {
   status: string;
   created_at: string;
   updated_at: string;
+  property_id?: string;
+  created_by?: string;
+  property?: string; // Added for compatibility
+  vendor?: string;   // Added for compatibility
+  notes?: string;    // Added for compatibility
+  paymentMethod?: string; // Added for compatibility with existing components
 };
 
 export type CleaningTask = {
@@ -76,6 +101,7 @@ export type CleaningTask = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  property_id?: string;
 };
 
 export type PropertyOwnership = {
@@ -87,4 +113,44 @@ export type PropertyOwnership = {
   contract_end_date: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type EmailTemplate = {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  variables: any;
+  property_id?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Property = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  postal_code?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  tax_rate?: number;
+  timezone?: string;
+  check_in_time?: string;
+  check_out_time?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AuditLog = {
+  id: string;
+  action: string;
+  resource_type: string;
+  resource_id: string;
+  user_id: string;
+  details: any;
+  created_at: string;
 };

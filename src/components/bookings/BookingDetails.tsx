@@ -77,11 +77,11 @@ export function BookingDetails() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <h3 className="font-medium">Email Address</h3>
-                <p className="text-muted-foreground">{booking.guestEmail}</p>
+                <p className="text-muted-foreground">{booking.guestEmail || 'N/A'}</p>
               </div>
               <div className="space-y-2">
                 <h3 className="font-medium">Phone Number</h3>
-                <p className="text-muted-foreground">{booking.guestPhone}</p>
+                <p className="text-muted-foreground">{booking.guestPhone || 'N/A'}</p>
               </div>
             </div>
 
@@ -119,7 +119,7 @@ export function BookingDetails() {
                 <div className="text-right font-medium">{booking.check_out}</div>
                 <div>Guests</div>
                 <div className="text-right font-medium">
-                  {(booking.adults || 0) + (booking.children || 0)} ({booking.adults || 0} adults, {booking.children || 0} children)
+                  {((booking.adults || 0) + (booking.children || 0))} ({booking.adults || 0} adults, {booking.children || 0} children)
                 </div>
               </div>
             </div>
@@ -127,11 +127,11 @@ export function BookingDetails() {
             <div className="space-y-3 pt-3 border-t">
               <div className="flex justify-between text-sm">
                 <span>Base Rate:</span>
-                <span>${booking.baseRate?.toFixed(2) || '0.00'}</span>
+                <span>${booking.baseRate?.toFixed(2) || booking.amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total Amount:</span>
-                <span>${booking.amount?.toFixed(2) || '0.00'}</span>
+                <span>${booking.amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Security Deposit:</span>
@@ -151,11 +151,11 @@ export function BookingDetails() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <h3 className="font-medium">Property</h3>
-                <p className="text-muted-foreground">{booking.rooms?.property}</p>
+                <p className="text-muted-foreground">{booking.rooms?.property || 'N/A'}</p>
               </div>
               <div className="space-y-2">
                 <h3 className="font-medium">Room Number</h3>
-                <p className="text-muted-foreground">{booking.rooms?.number}</p>
+                <p className="text-muted-foreground">{booking.rooms?.number || 'N/A'}</p>
               </div>
             </div>
           </CardContent>
@@ -198,7 +198,7 @@ export function BookingDetails() {
             <CardDescription>Additional notes and special requests</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">{booking.notes || 'No notes available'}</p>
+            <p className="text-muted-foreground">{booking.notes || booking.special_requests || 'No notes available'}</p>
           </CardContent>
         </Card>
       </div>

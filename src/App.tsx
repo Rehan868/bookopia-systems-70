@@ -43,124 +43,128 @@ import OwnerCleaningStatus from "./pages/OwnerCleaningStatus";
 import OwnerReports from "./pages/OwnerReports";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import { useState } from 'react';
 
-const queryClient = new QueryClient();
+const App = () => {
+  // Create a new QueryClient instance inside the component
+  const [queryClient] = useState(() => new QueryClient());
+  
+  const ProtectedRoute = ({ 
+    children,
+    requiredRole = ["admin", "staff", "manager"],
+  }: { 
+    children: JSX.Element,
+    requiredRole?: string[]
+  }) => {
+    const { isAuthenticated, user } = useAuth();
+    
+    if (!isAuthenticated) {
+      return <Navigate to="/login" />;
+    }
+    
+    if (user && !requiredRole.includes(user.role)) {
+      return <Navigate to="/" />;
+    }
+    
+    return children;
+  };
 
-const ProtectedRoute = ({ 
-  children,
-  requiredRole = ["admin", "staff", "manager"],
-}: { 
-  children: JSX.Element,
-  requiredRole?: string[]
-}) => {
-  const { isAuthenticated, user } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-  
-  if (user && !requiredRole.includes(user.role)) {
-    return <Navigate to="/" />;
-  }
-  
-  return children;
-};
-
-const MainLayout = () => {
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-6 bg-background overflow-auto">
-          <div className="max-w-[1600px] mx-auto">
-            <Outlet />
-          </div>
-        </main>
+  const MainLayout = () => {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="flex-1 p-6 bg-background overflow-auto">
+            <div className="max-w-[1600px] mx-auto">
+              <Outlet />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/owner/login" element={<OwnerLogin />} />
+              
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="bookings" element={<Bookings />} />
+                <Route path="bookings/:id" element={<BookingView />} />
+                <Route path="bookings/new" element={<BookingAdd />} />
+                <Route path="bookings/edit/:id" element={<BookingEdit />} />
+                <Route path="availability" element={<Availability />} />
+                <Route path="rooms" element={<Rooms />} />
+                <Route path="rooms/view/:id" element={<RoomView />} />
+                <Route path="rooms/add" element={<RoomAdd />} />
+                <Route path="rooms/edit/:id" element={<RoomEdit />} />
+                <Route path="expenses" element={<Expenses />} />
+                <Route path="expenses/add" element={<ExpenseAdd />} />
+                <Route path="expenses/:id" element={<ExpenseView />} />
+                <Route path="expenses/edit/:id" element={<ExpenseEdit />} />
+                <Route path="cleaning" element={<CleaningStatus />} />
+                <Route path="users" element={
+                  <ProtectedRoute requiredRole={["admin"]}>
+                    <Users />
+                  </ProtectedRoute>
+                } />
+                <Route path="users/add" element={
+                  <ProtectedRoute requiredRole={["admin"]}>
+                    <UserAdd />
+                  </ProtectedRoute>
+                } />
+                <Route path="users/:id" element={
+                  <ProtectedRoute requiredRole={["admin"]}>
+                    <UserView />
+                  </ProtectedRoute>
+                } />
+                <Route path="users/edit/:id" element={
+                  <ProtectedRoute requiredRole={["admin"]}>
+                    <UserEdit />
+                  </ProtectedRoute>
+                } />
+                <Route path="owners" element={<Owners />} />
+                <Route path="owners/add" element={<OwnerAdd />} />
+                <Route path="owners/:id" element={<OwnerView />} />
+                <Route path="owners/edit/:id" element={<OwnerEdit />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="audit" element={<AuditLogs />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              
+              <Route path="/owner" element={
+                <ProtectedRoute requiredRole={["owner"]}>
+                  <OwnerLayout />
+                </ProtectedRoute>
+              }>
+                <Route path="dashboard" element={<OwnerDashboard />} />
+                <Route path="bookings" element={<OwnerBookings />} />
+                <Route path="availability" element={<OwnerAvailability />} />
+                <Route path="cleaning" element={<OwnerCleaningStatus />} />
+                <Route path="reports" element={<OwnerReports />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/owner/login" element={<OwnerLogin />} />
-            
-            <Route path="/" element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="bookings" element={<Bookings />} />
-              <Route path="bookings/:id" element={<BookingView />} />
-              <Route path="bookings/new" element={<BookingAdd />} />
-              <Route path="bookings/edit/:id" element={<BookingEdit />} />
-              <Route path="availability" element={<Availability />} />
-              <Route path="rooms" element={<Rooms />} />
-              <Route path="rooms/view/:id" element={<RoomView />} />
-              <Route path="rooms/add" element={<RoomAdd />} />
-              <Route path="rooms/edit/:id" element={<RoomEdit />} />
-              <Route path="expenses" element={<Expenses />} />
-              <Route path="expenses/add" element={<ExpenseAdd />} />
-              <Route path="expenses/:id" element={<ExpenseView />} />
-              <Route path="expenses/edit/:id" element={<ExpenseEdit />} />
-              <Route path="cleaning" element={<CleaningStatus />} />
-              <Route path="users" element={
-                <ProtectedRoute requiredRole={["admin"]}>
-                  <Users />
-                </ProtectedRoute>
-              } />
-              <Route path="users/add" element={
-                <ProtectedRoute requiredRole={["admin"]}>
-                  <UserAdd />
-                </ProtectedRoute>
-              } />
-              <Route path="users/:id" element={
-                <ProtectedRoute requiredRole={["admin"]}>
-                  <UserView />
-                </ProtectedRoute>
-              } />
-              <Route path="users/edit/:id" element={
-                <ProtectedRoute requiredRole={["admin"]}>
-                  <UserEdit />
-                </ProtectedRoute>
-              } />
-              <Route path="owners" element={<Owners />} />
-              <Route path="owners/add" element={<OwnerAdd />} />
-              <Route path="owners/:id" element={<OwnerView />} />
-              <Route path="owners/edit/:id" element={<OwnerEdit />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="audit" element={<AuditLogs />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            
-            <Route path="/owner" element={
-              <ProtectedRoute requiredRole={["owner"]}>
-                <OwnerLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<OwnerDashboard />} />
-              <Route path="bookings" element={<OwnerBookings />} />
-              <Route path="availability" element={<OwnerAvailability />} />
-              <Route path="cleaning" element={<OwnerCleaningStatus />} />
-              <Route path="reports" element={<OwnerReports />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
 
 export default App;

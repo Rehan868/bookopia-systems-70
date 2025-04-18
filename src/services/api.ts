@@ -7,9 +7,13 @@ import {
   Owner, 
   Expense, 
   CleaningTask,
-  PropertyOwnership
+  PropertyOwnership,
+  Property,
+  EmailTemplate,
+  AuditLog
 } from './supabase-types';
 
+// Room related functions
 export const fetchRooms = async (): Promise<Room[]> => {
   const { data, error } = await supabase
     .from('rooms')
@@ -20,10 +24,7 @@ export const fetchRooms = async (): Promise<Room[]> => {
     throw error;
   }
   
-  return (data || []).map(room => ({
-    ...room,
-    status: room.status as 'available' | 'occupied' | 'maintenance'
-  })) as Room[];
+  return data as Room[];
 };
 
 export const fetchRoomById = async (id: string): Promise<Room> => {
@@ -38,10 +39,7 @@ export const fetchRoomById = async (id: string): Promise<Room> => {
     throw error;
   }
   
-  return {
-    ...data,
-    status: data.status as 'available' | 'occupied' | 'maintenance'
-  } as Room;
+  return data as Room;
 };
 
 export const fetchRoomByNumber = async (number: string): Promise<Room> => {
@@ -56,12 +54,10 @@ export const fetchRoomByNumber = async (number: string): Promise<Room> => {
     throw error;
   }
   
-  return {
-    ...data,
-    status: data.status as 'available' | 'occupied' | 'maintenance'
-  } as Room;
+  return data as Room;
 };
 
+// Booking related functions
 export const fetchBookings = async (): Promise<Booking[]> => {
   const { data, error } = await supabase
     .from('bookings')
@@ -124,6 +120,7 @@ export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
   return data || [];
 };
 
+// User related functions
 export const fetchUsers = async (): Promise<User[]> => {
   const { data, error } = await supabase
     .from('users')
@@ -137,6 +134,7 @@ export const fetchUsers = async (): Promise<User[]> => {
   return data || [];
 };
 
+// Owner related functions
 export const fetchOwners = async (): Promise<Owner[]> => {
   const { data, error } = await supabase
     .from('owners')
@@ -150,6 +148,7 @@ export const fetchOwners = async (): Promise<Owner[]> => {
   return data || [];
 };
 
+// Expense related functions
 export const fetchExpenses = async (): Promise<Expense[]> => {
   const { data, error } = await supabase
     .from('expenses')
@@ -161,9 +160,10 @@ export const fetchExpenses = async (): Promise<Expense[]> => {
     throw error;
   }
   
-  return data || [];
+  return data as Expense[] || [];
 };
 
+// Cleaning tasks related functions
 export const fetchCleaningTasks = async (): Promise<CleaningTask[]> => {
   const { data, error } = await supabase
     .from('cleaning_tasks')
@@ -177,6 +177,7 @@ export const fetchCleaningTasks = async (): Promise<CleaningTask[]> => {
   return data || [];
 };
 
+// Property ownership related functions
 export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => {
   const { data, error } = await supabase
     .from('property_ownership')
@@ -190,7 +191,7 @@ export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => 
   return data || [];
 };
 
-// Fixed the type for updateBookingStatus to use a proper enum type
+// Status update functions
 export const updateBookingStatus = async (id: string, status: 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show'): Promise<void> => {
   const { error } = await supabase
     .from('bookings')
@@ -203,7 +204,6 @@ export const updateBookingStatus = async (id: string, status: 'pending' | 'confi
   }
 };
 
-// Fixed the type for updateRoomStatus to use a proper enum type
 export const updateRoomStatus = async (id: string, status: 'available' | 'occupied' | 'cleaning' | 'maintenance' | 'out-of-order'): Promise<void> => {
   const { error } = await supabase
     .from('rooms')
@@ -216,7 +216,6 @@ export const updateRoomStatus = async (id: string, status: 'available' | 'occupi
   }
 };
 
-// Fixed the type for updateCleaningTaskStatus to use a proper enum type
 export const updateCleaningTaskStatus = async (id: string, status: 'pending' | 'in-progress' | 'completed' | 'verified' | 'issues'): Promise<void> => {
   const { error } = await supabase
     .from('cleaning_tasks')
@@ -229,11 +228,17 @@ export const updateCleaningTaskStatus = async (id: string, status: 'pending' | '
   }
 };
 
-// Add functions for creating new data
+// Create functions
 export const createBooking = async (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking> => {
+  // Ensure payment_status is one of the allowed enum values
+  const payload = {
+    ...bookingData,
+    payment_status: bookingData.payment_status || 'pending'
+  };
+
   const { data, error } = await supabase
     .from('bookings')
-    .insert(bookingData)
+    .insert(payload)
     .select()
     .single();
   
@@ -261,9 +266,20 @@ export const createRoom = async (roomData: Omit<Room, 'id' | 'created_at' | 'upd
 };
 
 export const createExpense = async (expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>): Promise<Expense> => {
+  // Map any custom fields to the database fields
+  const dbExpense = {
+    description: expenseData.description,
+    amount: expenseData.amount,
+    date: expenseData.date,
+    category: expenseData.category,
+    payment_method: expenseData.payment_method || expenseData.paymentMethod,
+    status: expenseData.status,
+    property_id: expenseData.property_id
+  };
+
   const { data, error } = await supabase
     .from('expenses')
-    .insert(expenseData)
+    .insert(dbExpense)
     .select()
     .single();
   
@@ -276,9 +292,15 @@ export const createExpense = async (expenseData: Omit<Expense, 'id' | 'created_a
 };
 
 export const createCleaningTask = async (taskData: Omit<CleaningTask, 'id' | 'created_at' | 'updated_at'>): Promise<CleaningTask> => {
+  // Ensure status is one of the allowed enum values
+  const payload = {
+    ...taskData,
+    status: taskData.status || 'pending'
+  };
+
   const { data, error } = await supabase
     .from('cleaning_tasks')
-    .insert(taskData)
+    .insert(payload)
     .select()
     .single();
   
@@ -320,7 +342,7 @@ export const createOwner = async (ownerData: Omit<Owner, 'id' | 'created_at' | '
   return data;
 };
 
-export const createProperty = async (propertyData: any): Promise<any> => {
+export const createProperty = async (propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>): Promise<Property> => {
   const { data, error } = await supabase
     .from('properties')
     .insert(propertyData)
@@ -335,7 +357,7 @@ export const createProperty = async (propertyData: any): Promise<any> => {
   return data;
 };
 
-export const createEmailTemplate = async (templateData: any): Promise<any> => {
+export const createEmailTemplate = async (templateData: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<EmailTemplate> => {
   const { data, error } = await supabase
     .from('email_templates')
     .insert(templateData)
@@ -350,7 +372,7 @@ export const createEmailTemplate = async (templateData: any): Promise<any> => {
   return data;
 };
 
-export const fetchAuditLogs = async (): Promise<any[]> => {
+export const fetchAuditLogs = async (): Promise<AuditLog[]> => {
   const { data, error } = await supabase
     .from('audit_logs')
     .select('*')
@@ -364,7 +386,7 @@ export const fetchAuditLogs = async (): Promise<any[]> => {
   return data || [];
 };
 
-export const fetchEmailTemplates = async (): Promise<any[]> => {
+export const fetchEmailTemplates = async (): Promise<EmailTemplate[]> => {
   const { data, error } = await supabase
     .from('email_templates')
     .select('*');
@@ -377,7 +399,7 @@ export const fetchEmailTemplates = async (): Promise<any[]> => {
   return data || [];
 };
 
-export const fetchProperties = async (): Promise<any[]> => {
+export const fetchProperties = async (): Promise<Property[]> => {
   const { data, error } = await supabase
     .from('properties')
     .select('*');
@@ -390,7 +412,7 @@ export const fetchProperties = async (): Promise<any[]> => {
   return data || [];
 };
 
-// Function to update an existing booking
+// Update functions
 export const updateBooking = async (id: string, bookingData: Partial<Booking>): Promise<void> => {
   const { error } = await supabase
     .from('bookings')
@@ -403,7 +425,6 @@ export const updateBooking = async (id: string, bookingData: Partial<Booking>): 
   }
 };
 
-// Function to update an existing room
 export const updateRoom = async (id: string, roomData: Partial<Room>): Promise<void> => {
   const { error } = await supabase
     .from('rooms')
@@ -416,11 +437,18 @@ export const updateRoom = async (id: string, roomData: Partial<Room>): Promise<v
   }
 };
 
-// Function to update an existing expense
 export const updateExpense = async (id: string, expenseData: Partial<Expense>): Promise<void> => {
+  // Map any custom fields to the database fields
+  const dbExpense: any = { ...expenseData };
+  
+  if (expenseData.paymentMethod) {
+    dbExpense.payment_method = expenseData.paymentMethod;
+    delete dbExpense.paymentMethod;
+  }
+
   const { error } = await supabase
     .from('expenses')
-    .update(expenseData)
+    .update(dbExpense)
     .eq('id', id);
   
   if (error) {
@@ -429,7 +457,6 @@ export const updateExpense = async (id: string, expenseData: Partial<Expense>): 
   }
 };
 
-// Function to update an existing user
 export const updateUser = async (id: string, userData: Partial<User>): Promise<void> => {
   const { error } = await supabase
     .from('users')
@@ -442,7 +469,6 @@ export const updateUser = async (id: string, userData: Partial<User>): Promise<v
   }
 };
 
-// Function to update an existing owner
 export const updateOwner = async (id: string, ownerData: Partial<Owner>): Promise<void> => {
   const { error } = await supabase
     .from('owners')
