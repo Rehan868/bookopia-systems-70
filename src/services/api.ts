@@ -229,10 +229,11 @@ export const updateCleaningTaskStatus = async (id: string, status: 'pending' | '
 
 // Create functions
 export const createBooking = async (bookingData: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking> => {
-  // Ensure payment_status is one of the allowed enum values
+  // Ensure status and payment_status are valid enum values
   const payload = {
     ...bookingData,
-    payment_status: (bookingData.payment_status || 'pending') as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed'
+    payment_status: (bookingData.payment_status || 'pending') as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed',
+    status: (bookingData.status || 'confirmed') as 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show'
   };
 
   const { data, error } = await supabase
@@ -427,10 +428,15 @@ export const fetchProperties = async (): Promise<Property[]> => {
 
 // Update functions
 export const updateBooking = async (id: string, bookingData: Partial<Booking>): Promise<void> => {
-  // Process payment_status to ensure it's a valid enum value if it exists in the data
-  const payload = { ...bookingData };
+  // Process both payment_status and status to ensure they're valid enum values
+  const payload: any = { ...bookingData };
+  
   if (payload.payment_status) {
     payload.payment_status = payload.payment_status as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed';
+  }
+  
+  if (payload.status) {
+    payload.status = payload.status as 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show';
   }
 
   const { error } = await supabase
@@ -478,7 +484,7 @@ export const updateExpense = async (id: string, expenseData: Partial<Expense>): 
 
 export const updateUser = async (id: string, userData: Partial<User>): Promise<void> => {
   // Process role to ensure it's a valid enum value if it exists in the data
-  const payload = { ...userData };
+  const payload: any = { ...userData };
   if (payload.role) {
     payload.role = payload.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest';
   }

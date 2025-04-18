@@ -1,4 +1,3 @@
-
 export type Room = {
   id: string;
   number: string;
@@ -28,7 +27,7 @@ export type Booking = {
   check_in: string;
   check_out: string;
   amount: number;
-  status: string;
+  status: 'pending' | 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled' | 'no-show';
   payment_status: 'pending' | 'paid' | 'partial' | 'refunded' | 'failed';
   special_requests: string | null;
   created_at: string;
@@ -154,7 +153,7 @@ export type AuditLog = {
   user_id: string;
   details: any;
   created_at: string;
-  // Additional fields to match what's used in components
+  // Additional fields used in components
   user: string;
   ip_address?: string;
   type: string;
