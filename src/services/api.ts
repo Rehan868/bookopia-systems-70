@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Room, 
@@ -233,7 +232,7 @@ export const createBooking = async (bookingData: Omit<Booking, 'id' | 'created_a
   // Ensure payment_status is one of the allowed enum values
   const payload = {
     ...bookingData,
-    payment_status: bookingData.payment_status || 'pending'
+    payment_status: (bookingData.payment_status || 'pending') as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed'
   };
 
   const { data, error } = await supabase
@@ -295,7 +294,7 @@ export const createCleaningTask = async (taskData: Omit<CleaningTask, 'id' | 'cr
   // Ensure status is one of the allowed enum values
   const payload = {
     ...taskData,
-    status: taskData.status || 'pending'
+    status: (taskData.status || 'pending') as 'pending' | 'in-progress' | 'completed' | 'verified' | 'issues'
   };
 
   const { data, error } = await supabase
@@ -313,9 +312,15 @@ export const createCleaningTask = async (taskData: Omit<CleaningTask, 'id' | 'cr
 };
 
 export const createUser = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> => {
+  // Cast the role to ensure it's one of the allowed enum values
+  const payload = {
+    ...userData,
+    role: userData.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest'
+  };
+
   const { data, error } = await supabase
     .from('users')
-    .insert(userData)
+    .insert(payload)
     .select()
     .single();
   
@@ -383,7 +388,15 @@ export const fetchAuditLogs = async (): Promise<AuditLog[]> => {
     throw error;
   }
   
-  return data || [];
+  // Transform the data to match the AuditLog type
+  const transformedData = (data || []).map(log => ({
+    ...log,
+    user: log.user_id || 'Unknown',
+    type: log.resource_type || 'System',
+    timestamp: log.created_at,
+  }));
+  
+  return transformedData;
 };
 
 export const fetchEmailTemplates = async (): Promise<EmailTemplate[]> => {
@@ -414,9 +427,15 @@ export const fetchProperties = async (): Promise<Property[]> => {
 
 // Update functions
 export const updateBooking = async (id: string, bookingData: Partial<Booking>): Promise<void> => {
+  // Process payment_status to ensure it's a valid enum value if it exists in the data
+  const payload = { ...bookingData };
+  if (payload.payment_status) {
+    payload.payment_status = payload.payment_status as 'pending' | 'paid' | 'partial' | 'refunded' | 'failed';
+  }
+
   const { error } = await supabase
     .from('bookings')
-    .update(bookingData)
+    .update(payload)
     .eq('id', id);
   
   if (error) {
@@ -458,9 +477,15 @@ export const updateExpense = async (id: string, expenseData: Partial<Expense>): 
 };
 
 export const updateUser = async (id: string, userData: Partial<User>): Promise<void> => {
+  // Process role to ensure it's a valid enum value if it exists in the data
+  const payload = { ...userData };
+  if (payload.role) {
+    payload.role = payload.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest';
+  }
+
   const { error } = await supabase
     .from('users')
-    .update(userData)
+    .update(payload)
     .eq('id', id);
   
   if (error) {

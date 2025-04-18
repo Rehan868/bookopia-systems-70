@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AuditLog } from '@/services/supabase-types';
 
 const UserView = () => {
   const { id } = useParams();
@@ -72,7 +73,7 @@ const UserView = () => {
           <CardContent className="space-y-6">
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={user.avatar || undefined} />
+                <AvatarImage src={user.avatar_url || user.avatar || undefined} />
                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
               </Avatar>
               <div>
@@ -106,7 +107,7 @@ const UserView = () => {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">Last Login</p>
-              <p className="font-medium">{user.lastActive || 'Never'}</p>
+              <p className="font-medium">{user.last_active || user.lastActive || 'Never'}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Created At</p>
@@ -140,7 +141,7 @@ const UserView = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {userLogs.map((log) => (
+                {userLogs.map((log: AuditLog) => (
                   <TableRow key={log.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">

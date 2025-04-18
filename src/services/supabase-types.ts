@@ -29,7 +29,7 @@ export type Booking = {
   check_out: string;
   amount: number;
   status: string;
-  payment_status: string;
+  payment_status: 'pending' | 'paid' | 'partial' | 'refunded' | 'failed';
   special_requests: string | null;
   created_at: string;
   updated_at: string;
@@ -55,13 +55,14 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest';
   status: string;
   avatar_url: string | null;
   last_active: string | null;
   created_at: string;
   updated_at: string;
   avatar?: string; // Added for compatibility with existing components
+  lastActive?: string; // Added for compatibility with existing components
 };
 
 export type Owner = {
@@ -97,7 +98,7 @@ export type CleaningTask = {
   room_id: string;
   date: string;
   assigned_to: string;
-  status: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'verified' | 'issues';
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -153,4 +154,9 @@ export type AuditLog = {
   user_id: string;
   details: any;
   created_at: string;
+  // Additional fields to match what's used in components
+  user: string;
+  ip_address?: string;
+  type: string;
+  timestamp: string;
 };
