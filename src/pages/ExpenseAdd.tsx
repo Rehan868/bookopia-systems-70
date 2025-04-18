@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,16 +19,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useCreateExpense } from '@/hooks/useExpenses';
-import { useProperties } from '@/hooks/useProperties';
 
 const ExpenseAdd = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const createExpenseMutation = useCreateExpense();
-  const { data: properties, isLoading: propertiesLoading } = useProperties();
   
   const [formData, setFormData] = useState({
     description: '',
@@ -63,24 +60,17 @@ const ExpenseAdd = () => {
     
     setIsSubmitting(true);
     
-    try {
-      await createExpenseMutation.mutateAsync({
-        description: formData.description,
-        amount: parseFloat(formData.amount),
-        date: date.toISOString().split('T')[0],
-        category: formData.category,
-        payment_method: formData.paymentMethod || 'Other',
-        status: 'pending',
-        property_id: formData.property, // This should be the property UUID
-        created_by: null // This would be set by the database based on the authenticated user
-      });
-      
-      // Navigate back to expenses list
-      navigate('/expenses');
-    } catch (error) {
-      console.error('Error creating expense:', error);
-      setIsSubmitting(false);
-    }
+    // In a real app, this would send data to the database
+    // For now, we'll just simulate a successful submission
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    toast({
+      title: "Expense Added",
+      description: `${formData.description} has been successfully added.`,
+    });
+    
+    // Navigate back to expenses list
+    navigate('/expenses');
   };
   
   return (
@@ -189,21 +179,9 @@ const ExpenseAdd = () => {
                       <SelectValue placeholder="Select a property" />
                     </SelectTrigger>
                     <SelectContent>
-                      {propertiesLoading ? (
-                        <SelectItem value="" disabled>Loading properties...</SelectItem>
-                      ) : properties && properties.length > 0 ? (
-                        properties.map((property: any) => (
-                          <SelectItem key={property.id} value={property.id}>
-                            {property.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <>
-                          <SelectItem value="Marina Tower">Marina Tower</SelectItem>
-                          <SelectItem value="Downtown Heights">Downtown Heights</SelectItem>
-                          <SelectItem value="All Properties">All Properties</SelectItem>
-                        </>
-                      )}
+                      <SelectItem value="Marina Tower">Marina Tower</SelectItem>
+                      <SelectItem value="Downtown Heights">Downtown Heights</SelectItem>
+                      <SelectItem value="All Properties">All Properties</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

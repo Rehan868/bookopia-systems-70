@@ -2,43 +2,31 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { AddEditBookingForm } from '@/components/bookings/AddEditBookingForm';
-import { useBooking } from '@/hooks/useBookings';
 
 const BookingEdit = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: booking, isLoading, error } = useBooking(id || '');
   
-  if (isLoading) {
-    return <div>Loading booking details...</div>;
-  }
+  // In a real app, the booking data would be fetched using the ID
+  console.log('Editing booking with ID:', id);
   
-  if (error || !booking) {
-    return <div>Error loading booking details. Please try again.</div>;
-  }
-  
-  // Transform the API data to match the form's expected format
+  // Mocked data for an existing booking
   const bookingData = {
-    reference: booking.booking_number,
-    guestName: booking.guest_name,
-    guestEmail: booking.guestEmail || '',
-    guestPhone: booking.guestPhone || '',
-    property: booking.property_id || '',
-    roomNumber: booking.room_id,
-    checkIn: new Date(booking.check_in),
-    checkOut: new Date(booking.check_out),
-    adults: booking.adults || 2,
-    children: booking.children || 0,
-    baseRate: booking.baseRate || 0,
-    totalAmount: booking.amount,
-    securityDeposit: booking.securityDeposit || 0,
-    commission: booking.commission || 0,
-    tourismFee: booking.tourismFee || 0,
-    vat: booking.vat || 0,
-    netToOwner: booking.netToOwner || 0,
-    notes: booking.special_requests || '',
-    status: booking.status,
-    paymentStatus: booking.payment_status,
-    sendConfirmation: false,
+    reference: 'BK-2023-0012',
+    guestName: 'John Smith',
+    guestEmail: 'john.smith@example.com',
+    guestPhone: '+1 (555) 123-4567',
+    property: 'Marina Tower',
+    roomNumber: '101',
+    checkIn: new Date('2023-11-18'),
+    checkOut: new Date('2023-11-21'),
+    adults: 2,
+    children: 0,
+    baseRate: 150,
+    totalAmount: 450,
+    notes: 'Guest requested a high floor with ocean view. Prefers quiet room away from elevator.',
+    status: 'confirmed',
+    paymentStatus: 'paid',
+    sendConfirmation: true,
   };
   
   return <AddEditBookingForm mode="edit" bookingData={bookingData} />;

@@ -7,7 +7,6 @@ import { AlertTriangle, Key, Settings, ShoppingCart, User, Loader } from 'lucide
 import { useAuditLogs } from '@/hooks/useAuditLogs';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { AuditLog } from '@/services/supabase-types';
 
 function getLogTypeIcon(type: string) {
   switch (type.toLowerCase()) {
@@ -58,15 +57,15 @@ export function AuditLogList({
   const filteredLogs = useMemo(() => {
     if (!logs) return [];
     
-    return logs.filter((log: AuditLog) => {
+    return logs.filter(log => {
       // Apply search filter
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = 
         !searchQuery || 
         log.action.toLowerCase().includes(searchLower) ||
         log.user.toLowerCase().includes(searchLower) ||
-        (log.ip_address?.toLowerCase() || '').includes(searchLower) ||
-        (log.details?.toLowerCase() || '').includes(searchLower);
+        log.ip_address?.toLowerCase().includes(searchLower) ||
+        log.details?.toLowerCase().includes(searchLower);
       
       // Apply type filter
       const matchesType = filterValue === 'all' || log.type.toLowerCase() === filterValue.toLowerCase();
@@ -123,7 +122,7 @@ export function AuditLogList({
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {filteredLogs.map((log: AuditLog) => (
+          {filteredLogs.map((log) => (
             <tr key={log.id} className="hover:bg-muted/50 transition-colors">
               <td className="px-6 py-4">
                 <div className="flex items-center space-x-2">
@@ -138,9 +137,9 @@ export function AuditLogList({
               </td>
               <td className="px-6 py-4">{log.user}</td>
               <td className="px-6 py-4 font-medium">{log.action}</td>
-              <td className="px-6 py-4 font-mono text-sm">{log.ip_address || '-'}</td>
+              <td className="px-6 py-4 font-mono text-sm">{log.ip_address}</td>
               <td className="px-6 py-4 text-sm text-muted-foreground truncate max-w-xs">
-                {log.details || '-'}
+                {log.details}
               </td>
             </tr>
           ))}

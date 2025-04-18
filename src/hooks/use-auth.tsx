@@ -1,184 +1,90 @@
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Extended User type to include role and name properties
-interface User extends SupabaseUser {
-  role?: 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest';
-  name?: string;
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
   ownerLogin: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log('Auth state changed:', event);
-        setSession(currentSession);
-        
-        // Extend the user with additional properties if needed
-        if (currentSession?.user) {
-          // In a real app, you would fetch the user's role from the database
-          // Fetch additional user data from our users table
-          const fetchUserData = async () => {
-            try {
-              const { data, error } = await supabase
-                .from('users')
-                .select('name, role, status')
-                .eq('id', currentSession.user.id)
-                .single();
-                
-              if (error) {
-                console.error('Error fetching user data:', error);
-                // Use default values if we can't fetch from database
-                const extendedUser: User = {
-                  ...currentSession.user,
-                  role: 'staff',
-                  name: currentSession.user.email?.split('@')[0] || 'User',
-                };
-                setUser(extendedUser);
-                return;
-              }
-              
-              if (data) {
-                const extendedUser: User = {
-                  ...currentSession.user,
-                  role: data.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest',
-                  name: data.name || currentSession.user.email?.split('@')[0] || 'User',
-                };
-                setUser(extendedUser);
-              }
-            } catch (err) {
-              console.error('Error in fetchUserData:', err);
-              // Use default values if we can't fetch from database
-              const extendedUser: User = {
-                ...currentSession.user,
-                role: 'staff',
-                name: currentSession.user.email?.split('@')[0] || 'User',
-              };
-              setUser(extendedUser);
-            }
-          };
-          
-          // Use setTimeout to avoid calling Supabase functions directly inside the callback
-          setTimeout(fetchUserData, 0);
-        } else {
-          setUser(null);
-        }
-        
-        setIsAuthenticated(!!currentSession);
-      }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      
-      // Extend the user with additional properties if needed
-      if (currentSession?.user) {
-        // Fetch additional user data from our users table
-        const fetchUserData = async () => {
-          try {
-            const { data, error } = await supabase
-              .from('users')
-              .select('name, role, status')
-              .eq('id', currentSession.user.id)
-              .single();
-              
-            if (error) {
-              console.error('Error fetching user data:', error);
-              // Use default values if we can't fetch from database
-              const extendedUser: User = {
-                ...currentSession.user,
-                role: 'staff',
-                name: currentSession.user.email?.split('@')[0] || 'User',
-              };
-              setUser(extendedUser);
-              return;
-            }
-            
-            if (data) {
-              const extendedUser: User = {
-                ...currentSession.user,
-                role: data.role as 'admin' | 'manager' | 'staff' | 'cleaner' | 'owner' | 'guest',
-                name: data.name || currentSession.user.email?.split('@')[0] || 'User',
-              };
-              setUser(extendedUser);
-            }
-          } catch (err) {
-            console.error('Error in fetchUserData:', err);
-            // Use default values if we can't fetch from database
-            const extendedUser: User = {
-              ...currentSession.user,
-              role: 'staff',
-              name: currentSession.user.email?.split('@')[0] || 'User',
-            };
-            setUser(extendedUser);
-          }
-        };
-        
-        fetchUserData();
-      } else {
-        setUser(null);
-      }
-      
-      setIsAuthenticated(!!currentSession);
-    });
-
-    return () => subscription.unsubscribe();
+    // Check if user is logged in from localStorage
+    const storedUser = localStorage.getItem('user');
+    const storedIsAuthenticated = localStorage.getItem('isAuthenticated');
+    
+    if (storedUser && storedIsAuthenticated === 'true') {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) throw error;
-  };
-
-  const ownerLogin = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) throw error;
+    // This is a mock login function - in a real app, this would call your API
+    // Simulate API call with delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // In a real app, you would verify that this user is an owner
-    // and redirect them to the owner dashboard
+    // For demo purposes, we'll just accept any credentials
+    const mockUser = {
+      id: '1',
+      name: 'Admin User',
+      email: email,
+      role: 'admin',
+    };
+    
+    // Store in local storage
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    // Update state
+    setUser(mockUser);
+    setIsAuthenticated(true);
   };
-
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+  
+  const ownerLogin = async (email: string, password: string) => {
+    // This is a mock login function for owners
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockUser = {
+      id: '2',
+      name: 'Owner User',
+      email: email,
+      role: 'owner',
+    };
+    
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    setUser(mockUser);
+    setIsAuthenticated(true);
+  };
+  
+  const logout = () => {
+    // Remove from local storage
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+    
+    // Update state
+    setUser(null);
+    setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{
-      isAuthenticated,
-      user,
-      session,
-      login,
-      ownerLogin,
-      logout
-    }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, ownerLogin }}>
       {children}
     </AuthContext.Provider>
   );

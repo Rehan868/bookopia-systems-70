@@ -36,10 +36,10 @@ export default function OwnerLogin() {
         description: "You have successfully logged in."
       });
       navigate('/owner/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Invalid credentials. Please try again.",
+        description: "Invalid credentials. Please try again.",
         variant: "destructive"
       });
     } finally {

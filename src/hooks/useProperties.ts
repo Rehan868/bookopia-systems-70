@@ -1,65 +1,34 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchProperties, createProperty } from '@/services/api';
-import { useToast } from './use-toast';
-import { Property } from '@/services/supabase-types';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
+import { properties } from "@/lib/mock-data";
+import { useQuery } from "@tanstack/react-query";
 
 export const useProperties = () => {
-  const queryClient = useQueryClient();
-  const query = useQuery({
-    queryKey: ['properties'],
-    queryFn: fetchProperties
+  return useQuery({
+    queryKey: ["properties"],
+    queryFn: async () => {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return properties;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  
-  // Set up realtime subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('table-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'properties'
-        },
-        () => {
-          console.log('Properties table changed, invalidating query cache');
-          queryClient.invalidateQueries({ queryKey: ['properties'] });
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-  
-  return query;
 };
 
-export const useCreateProperty = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  
-  return useMutation({
-    mutationFn: (propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>) => {
-      return createProperty(propertyData);
+export const useProperty = (id: string) => {
+  return useQuery({
+    queryKey: ["property", id],
+    queryFn: async () => {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      const property = properties.find(p => p.id === id);
+      
+      if (!property) {
+        throw new Error(`Property with ID ${id} not found`);
+      }
+      
+      return property;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-      toast({
-        title: 'Property created',
-        description: 'The property has been created successfully',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Failed to create property',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
