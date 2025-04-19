@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RoomTypeForm } from '@/components/settings/RoomTypeForm';
+import RoomTypeForm from '@/components/settings/RoomTypeForm';
 
 const RoomTypeAdd = () => {
   return (

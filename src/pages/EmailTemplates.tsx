@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmailTemplateList } from '@/components/settings/EmailTemplateList';
+import EmailTemplateList from '@/components/settings/EmailTemplateList';
 
 const EmailTemplates = () => {
   return (

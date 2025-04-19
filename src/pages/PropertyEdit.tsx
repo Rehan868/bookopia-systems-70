@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PropertyForm } from '@/components/settings/PropertyForm';
+import PropertyForm from '@/components/settings/PropertyForm';
 
 const PropertyEdit = () => {
   const { id } = useParams();

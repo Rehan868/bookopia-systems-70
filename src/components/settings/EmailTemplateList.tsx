@@ -2,8 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const EmailTemplateList = () => {
+  const navigate = useNavigate();
   const templates = [
     { id: 1, name: 'Booking Confirmation', subject: 'Your booking is confirmed' },
     { id: 2, name: 'Check-in Reminder', subject: 'Your check-in is tomorrow' },
@@ -11,10 +13,19 @@ const EmailTemplateList = () => {
     { id: 4, name: 'Welcome Email', subject: 'Welcome to our property' },
   ];
 
+  const handleEdit = (id: number) => {
+    // Navigate to the edit page
+    navigate(`/settings/email-templates/edit/${id}`);
+  };
+
+  const handleAddTemplate = () => {
+    navigate('/settings/email-templates/new');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <Button>
+        <Button onClick={handleAddTemplate}>
           <Plus className="h-4 w-4 mr-2" />
           Add Template
         </Button>
@@ -35,7 +46,7 @@ const EmailTemplateList = () => {
                 <td className="p-3 font-medium">{template.name}</td>
                 <td className="p-3">{template.subject}</td>
                 <td className="p-3 text-right">
-                  <Button size="sm" variant="ghost">Edit</Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleEdit(template.id)}>Edit</Button>
                 </td>
               </tr>
             ))}

@@ -1,22 +1,22 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import SmsTemplateList from '@/components/settings/SmsTemplateList';
+import { SmsTemplateForm } from '@/components/settings/SmsTemplateForm';
 
-const SmsTemplates = () => {
+const SmsTemplateAdd = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">SMS Templates</h1>
+      <h1 className="text-3xl font-bold">Add SMS Template</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Manage SMS Templates</CardTitle>
+          <CardTitle>SMS Template Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <SmsTemplateList />
+          <SmsTemplateForm />
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default SmsTemplates;
+export default SmsTemplateAdd;

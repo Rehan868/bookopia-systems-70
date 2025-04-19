@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PropertyForm } from '@/components/settings/PropertyForm';
+import PropertyForm from '@/components/settings/PropertyForm';
 
 const PropertyAdd = () => {
   return (

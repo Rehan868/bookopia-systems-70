@@ -47,7 +47,11 @@ import PropertyEdit from "./pages/PropertyEdit";
 import RoomTypeAdd from "./pages/RoomTypeAdd";
 import RoomTypeEdit from "./pages/RoomTypeEdit";
 import EmailTemplates from "./pages/EmailTemplates";
+import EmailTemplateAdd from "./pages/EmailTemplateAdd";
+import EmailTemplateEdit from "./pages/EmailTemplateEdit";
 import SmsTemplates from "./pages/SmsTemplates";
+import SmsTemplateAdd from "./pages/SmsTemplateAdd";
+import SmsTemplateEdit from "./pages/SmsTemplateEdit";
 
 const queryClient = new QueryClient();
 
@@ -151,7 +155,11 @@ const App = () => (
               <Route path="settings/room-types/new" element={<RoomTypeAdd />} />
               <Route path="settings/room-types/edit/:id" element={<RoomTypeEdit />} />
               <Route path="settings/email-templates" element={<EmailTemplates />} />
+              <Route path="settings/email-templates/new" element={<EmailTemplateAdd />} />
+              <Route path="settings/email-templates/edit/:id" element={<EmailTemplateEdit />} />
               <Route path="settings/sms-templates" element={<SmsTemplates />} />
+              <Route path="settings/sms-templates/new" element={<SmsTemplateAdd />} />
+              <Route path="settings/sms-templates/edit/:id" element={<SmsTemplateEdit />} />
             </Route>
             
             <Route path="/owner" element={
