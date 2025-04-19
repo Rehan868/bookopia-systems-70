@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Room, 
@@ -190,9 +191,12 @@ export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => 
 };
 
 export const updateBookingStatus = async (id: string, status: string): Promise<void> => {
+  // Type assertion to ensure the status is of the correct type
+  const validStatus = status as "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled" | "no-show";
+  
   const { error } = await supabase
     .from('bookings')
-    .update({ status })
+    .update({ status: validStatus })
     .eq('id', id);
   
   if (error) {
@@ -202,9 +206,12 @@ export const updateBookingStatus = async (id: string, status: string): Promise<v
 };
 
 export const updateRoomStatus = async (id: string, status: string): Promise<void> => {
+  // Type assertion to ensure the status is of the correct type
+  const validStatus = status as "available" | "occupied" | "cleaning" | "maintenance" | "out-of-order";
+  
   const { error } = await supabase
     .from('rooms')
-    .update({ status })
+    .update({ status: validStatus })
     .eq('id', id);
   
   if (error) {
@@ -214,9 +221,12 @@ export const updateRoomStatus = async (id: string, status: string): Promise<void
 };
 
 export const updateCleaningTaskStatus = async (id: string, status: string): Promise<void> => {
+  // Type assertion to ensure the status is of the correct type
+  const validStatus = status as "pending" | "in-progress" | "completed" | "verified" | "issues";
+  
   const { error } = await supabase
     .from('cleaning_tasks')
-    .update({ status })
+    .update({ status: validStatus })
     .eq('id', id);
   
   if (error) {

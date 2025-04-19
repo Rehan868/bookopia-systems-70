@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Booking } from '@/services/supabase-types';
 
 // Mock data for bookings
 const mockBookings = [
@@ -145,9 +147,10 @@ export function useBooking(id: string) {
           }
         } else if (bookingData) {
           // Ensure all numeric fields are properly formatted
+          // For real data that may not have all the financial fields, provide defaults
           const formattedData = {
             ...bookingData,
-            amount: Number(bookingData.amount),
+            amount: Number(bookingData.amount || 0),
             commission: Number(bookingData.commission || 0),
             tourismFee: Number(bookingData.tourismFee || 0),
             vat: Number(bookingData.vat || 0),
