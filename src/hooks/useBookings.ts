@@ -1,4 +1,8 @@
 
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Booking } from '@/services/supabase-types';
+
 // Mock data for bookings
 const mockBookings = [
   {
@@ -188,6 +192,7 @@ export function useBookings() {
               children: booking.children || 0,
               guestEmail: booking.guestEmail || '',
               guestPhone: booking.guestPhone || '',
+              guestDocument: booking.guestDocument || '',
               payment_status: booking.payment_status || 'pending',
               amountPaid: booking.amountPaid || 0,
               pendingAmount: booking.pendingAmount || booking.amount
@@ -308,7 +313,7 @@ export function useBooking(id: string) {
 }
 
 export function useTodayCheckins() {
-  const [data, setData] = useState<any[] | null>(null);
+  const [data, setData] = useState<Booking[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -337,7 +342,7 @@ export function useTodayCheckins() {
 }
 
 export function useTodayCheckouts() {
-  const [data, setData] = useState<any[] | null>(null);
+  const [data, setData] = useState<Booking[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
