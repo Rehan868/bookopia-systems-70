@@ -72,7 +72,6 @@ export const fetchBookings = async (): Promise<Booking[]> => {
   }
   
   const transformedData = (data || []).map(booking => {
-    // Use type assertion to safely add the needed properties
     const enhancedBooking = {
       ...booking,
       commission: booking.commission || Number(booking.amount) * 0.1,
@@ -107,7 +106,6 @@ export const fetchBookingById = async (id: string): Promise<Booking> => {
     throw error;
   }
   
-  // Add the additional properties with type assertion
   const formattedData = {
     ...data,
     commission: data.commission || Number(data.amount) * 0.1,
@@ -142,22 +140,25 @@ export const fetchTodayCheckins = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  const transformedData = (data || []).map(booking => ({
-    ...booking,
-    commission: booking.commission || Number(booking.amount) * 0.1,
-    tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-    vat: booking.vat || Number(booking.amount) * 0.05,
-    netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-    securityDeposit: booking.securityDeposit || 100,
-    baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-    adults: booking.adults || 1,
-    children: booking.children || 0,
-    guestEmail: booking.guestEmail || '',
-    guestPhone: booking.guestPhone || '',
-    guestDocument: booking.guestDocument || '',
-    amountPaid: booking.amountPaid || 0,
-    pendingAmount: booking.pendingAmount || booking.amount
-  })) as unknown as Booking[];
+  const transformedData = (data || []).map(booking => {
+    const enhancedBooking = {
+      ...booking,
+      commission: booking.commission || Number(booking.amount) * 0.1,
+      tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+      vat: booking.vat || Number(booking.amount) * 0.05,
+      netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+      securityDeposit: booking.securityDeposit || 100,
+      baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+      adults: booking.adults || 1,
+      children: booking.children || 0,
+      guestEmail: booking.guestEmail || '',
+      guestPhone: booking.guestPhone || '',
+      guestDocument: booking.guestDocument || '',
+      amountPaid: booking.amountPaid || 0,
+      pendingAmount: booking.pendingAmount || booking.amount
+    };
+    return enhancedBooking as unknown as Booking;
+  });
   
   return transformedData;
 };
@@ -176,22 +177,25 @@ export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  const transformedData = (data || []).map(booking => ({
-    ...booking,
-    commission: booking.commission || Number(booking.amount) * 0.1,
-    tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-    vat: booking.vat || Number(booking.amount) * 0.05,
-    netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-    securityDeposit: booking.securityDeposit || 100,
-    baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-    adults: booking.adults || 1,
-    children: booking.children || 0,
-    guestEmail: booking.guestEmail || '',
-    guestPhone: booking.guestPhone || '',
-    guestDocument: booking.guestDocument || '',
-    amountPaid: booking.amountPaid || 0,
-    pendingAmount: booking.pendingAmount || booking.amount
-  })) as unknown as Booking[];
+  const transformedData = (data || []).map(booking => {
+    const enhancedBooking = {
+      ...booking,
+      commission: booking.commission || Number(booking.amount) * 0.1,
+      tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+      vat: booking.vat || Number(booking.amount) * 0.05,
+      netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+      securityDeposit: booking.securityDeposit || 100,
+      baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+      adults: booking.adults || 1,
+      children: booking.children || 0,
+      guestEmail: booking.guestEmail || '',
+      guestPhone: booking.guestPhone || '',
+      guestDocument: booking.guestDocument || '',
+      amountPaid: booking.amountPaid || 0,
+      pendingAmount: booking.pendingAmount || booking.amount
+    };
+    return enhancedBooking as unknown as Booking;
+  });
   
   return transformedData;
 };

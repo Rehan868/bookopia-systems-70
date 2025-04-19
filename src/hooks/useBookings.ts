@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking } from '@/services/supabase-types';
@@ -26,7 +25,8 @@ const mockBookings = [
     guestPhone: '+1 (555) 123-4567',
     payment_status: 'paid',
     amountPaid: 450,
-    pendingAmount: 0
+    pendingAmount: 0,
+    guestDocument: 'passport-123.pdf'
   },
   {
     id: '2',
@@ -180,7 +180,7 @@ export function useBookings() {
           // Transform the data to match our Booking type
           const transformedData = bookingsData.map((booking: BookingDataFromDB) => {
             // Calculate derived fields or use defaults if they don't exist
-            return {
+            const enhancedBooking = {
               ...booking,
               commission: booking.commission || Number(booking.amount) * 0.1,
               tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
@@ -196,7 +196,9 @@ export function useBookings() {
               payment_status: booking.payment_status || 'pending',
               amountPaid: booking.amountPaid || 0,
               pendingAmount: booking.pendingAmount || booking.amount
-            } as unknown as Booking;
+            };
+            
+            return enhancedBooking as unknown as Booking;
           });
           
           setData(transformedData);
@@ -271,12 +273,12 @@ export function useBooking(id: string) {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
-          // Cast the bookingData to the BookingDataFromDB type
-          const formattedData = {
+          // Create an enhanced version of the booking data with all required fields
+          const enhancedBooking = {
             ...bookingData,
             // Ensure all financial data is numeric
             amount: Number(bookingData.amount || 0),
-            // Add properties that TypeScript complains about if they don't exist in bookingData
+            // Add properties with proper type assertion
             commission: Number(bookingData.commission || bookingData.amount * 0.1),
             tourismFee: Number(bookingData.tourismFee || bookingData.amount * 0.03),
             vat: Number(bookingData.vat || bookingData.amount * 0.05),
@@ -292,9 +294,9 @@ export function useBooking(id: string) {
             notes: bookingData.special_requests || '',
             amountPaid: Number(bookingData.amountPaid || 0),
             pendingAmount: Number(bookingData.pendingAmount || bookingData.amount)
-          } as unknown as Booking;
+          };
           
-          setData(formattedData);
+          setData(enhancedBooking as unknown as Booking);
         } else {
           throw new Error('Booking not found');
         }
