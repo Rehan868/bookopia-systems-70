@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { CalendarIcon, Upload } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -45,6 +46,16 @@ interface AddEditBookingFormProps {
   bookingData?: Partial<BookingFormData>;
 }
 
+// Helper function to ensure values are numbers
+const ensureNumber = (val: any): number => {
+  if (typeof val === 'number') return val;
+  if (typeof val === 'string') {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
 export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,15 +69,15 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     roomNumber: bookingData?.roomNumber || '',
     checkIn: bookingData?.checkIn || new Date(),
     checkOut: bookingData?.checkOut || new Date(new Date().setDate(new Date().getDate() + 3)),
-    adults: bookingData?.adults || 2,
-    children: bookingData?.children || 0,
-    baseRate: bookingData?.baseRate || 0,
-    totalAmount: bookingData?.totalAmount || 0,
-    securityDeposit: bookingData?.securityDeposit || 0,
-    commission: bookingData?.commission || 0,
-    tourismFee: bookingData?.tourismFee || 0,
-    vat: bookingData?.vat || 0,
-    netToOwner: bookingData?.netToOwner || 0,
+    adults: ensureNumber(bookingData?.adults) || 2,
+    children: ensureNumber(bookingData?.children) || 0,
+    baseRate: ensureNumber(bookingData?.baseRate) || 0,
+    totalAmount: ensureNumber(bookingData?.totalAmount) || 0,
+    securityDeposit: ensureNumber(bookingData?.securityDeposit) || 0,
+    commission: ensureNumber(bookingData?.commission) || 0,
+    tourismFee: ensureNumber(bookingData?.tourismFee) || 0,
+    vat: ensureNumber(bookingData?.vat) || 0,
+    netToOwner: ensureNumber(bookingData?.netToOwner) || 0,
     notes: bookingData?.notes || '',
     status: bookingData?.status || 'confirmed',
     paymentStatus: bookingData?.paymentStatus || 'pending',
@@ -80,6 +91,22 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     to: formData.checkOut,
   });
   
+  // Ensure numeric fields are always numbers when form data changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      adults: ensureNumber(prev.adults),
+      children: ensureNumber(prev.children),
+      baseRate: ensureNumber(prev.baseRate),
+      totalAmount: ensureNumber(prev.totalAmount),
+      securityDeposit: ensureNumber(prev.securityDeposit),
+      commission: ensureNumber(prev.commission),
+      tourismFee: ensureNumber(prev.tourismFee),
+      vat: ensureNumber(prev.vat),
+      netToOwner: ensureNumber(prev.netToOwner)
+    }));
+  }, []);
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -92,7 +119,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: Number(value),
+      [name]: ensureNumber(value),
     }));
   };
 
@@ -124,7 +151,8 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
         
         if (range.to) {
           const nights = Math.round((range.to.getTime() - range.from!.getTime()) / (1000 * 60 * 60 * 24));
-          const totalAmount = prev.baseRate * nights;
+          const baseRate = ensureNumber(prev.baseRate);
+          const totalAmount = baseRate * nights;
           const vat = totalAmount * 0.05; // 5% VAT
           const tourismFee = totalAmount * 0.03; // 3% Tourism Fee
           const commission = totalAmount * 0.1; // 10% Commission
@@ -162,6 +190,12 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     });
     
     navigate('/bookings');
+  };
+  
+  // Format a number for display, handling potential non-numeric values
+  const formatNumber = (value: any): string => {
+    const num = ensureNumber(value);
+    return num.toFixed(2);
   };
   
   return (
@@ -296,7 +330,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                 <div className="space-y-3 pt-3 border-t">
                   <div className="flex justify-between text-sm">
                     <span>Base Rate:</span>
-                    <span>${formData.baseRate.toFixed(2)}</span>
+                    <span>${formatNumber(formData.baseRate)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Nights:</span>
@@ -304,18 +338,18 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   </div>
                   <div className="flex justify-between font-medium">
                     <span>Total Amount:</span>
-                    <span>${formData.totalAmount.toFixed(2)}</span>
+                    <span>${formatNumber(formData.totalAmount)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Security Deposit:</span>
-                    <span>${formData.securityDeposit.toFixed(2)}</span>
+                    <span>${formatNumber(formData.securityDeposit)}</span>
                   </div>
                 </div>
                 
                 <div className="pt-3 border-t space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Grand Total:</span>
-                    <span>${(formData.totalAmount + formData.securityDeposit).toFixed(2)}</span>
+                    <span>${formatNumber(formData.totalAmount + formData.securityDeposit)}</span>
                   </div>
                   
                   <div className="flex justify-between text-sm">
@@ -472,7 +506,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.baseRate}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -486,7 +520,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.totalAmount}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -500,7 +534,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.commission}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -514,7 +548,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.tourismFee}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -528,7 +562,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.vat}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -542,7 +576,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.netToOwner}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                   required
                 />
               </div>
@@ -556,7 +590,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   min="0"
                   step="0.01"
                   value={formData.securityDeposit}
-                  onChange={handleInputChange}
+                  onChange={handleNumberChange}
                 />
               </div>
             </CardContent>

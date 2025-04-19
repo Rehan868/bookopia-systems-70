@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking } from '@/services/supabase-types';
@@ -146,9 +145,8 @@ export function useBooking(id: string) {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
-          // Ensure all numeric fields are properly formatted
-          // For real data that may not have all the financial fields, provide defaults
-          const formattedData = {
+          // Create a properly typed booking with all needed fields
+          const formattedData: Booking & Record<string, any> = {
             ...bookingData,
             amount: Number(bookingData.amount || 0),
             commission: Number(bookingData.commission || 0),
