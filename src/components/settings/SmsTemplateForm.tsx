@@ -83,12 +83,12 @@ export const SmsTemplateForm = ({ templateId }: SmsTemplateFormProps) => {
         <div className="bg-muted p-4 rounded-md">
           <h3 className="text-sm font-medium mb-2">Available Variables</h3>
           <ul className="text-sm space-y-1">
-            <li><code>{{name}}</code> - Guest's name</li>
-            <li><code>{{check_in}}</code> - Check-in date</li>
-            <li><code>{{check_out}}</code> - Check-out date</li>
-            <li><code>{{property}}</code> - Property name</li>
-            <li><code>{{room}}</code> - Room number</li>
-            <li><code>{{ref}}</code> - Booking reference</li>
+            <li><code>{"{{name}}"}</code> - Guest's name</li>
+            <li><code>{"{{check_in}}"}</code> - Check-in date</li>
+            <li><code>{"{{check_out}}"}</code> - Check-out date</li>
+            <li><code>{"{{property}}"}</code> - Property name</li>
+            <li><code>{"{{room}}"}</code> - Room number</li>
+            <li><code>{"{{ref}}"}</code> - Booking reference</li>
           </ul>
         </div>
       </div>

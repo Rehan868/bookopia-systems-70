@@ -77,12 +77,12 @@ export const EmailTemplateForm = ({ templateId }: EmailTemplateFormProps) => {
         <div className="bg-muted p-4 rounded-md">
           <h3 className="text-sm font-medium mb-2">Available Variables</h3>
           <ul className="text-sm space-y-1">
-            <li><code>{{guest_name}}</code> - Guest's full name</li>
-            <li><code>{{check_in_date}}</code> - Check-in date</li>
-            <li><code>{{check_out_date}}</code> - Check-out date</li>
-            <li><code>{{property_name}}</code> - Property name</li>
-            <li><code>{{room_number}}</code> - Room number</li>
-            <li><code>{{booking_number}}</code> - Booking reference</li>
+            <li><code>{"{{guest_name}}"}</code> - Guest's full name</li>
+            <li><code>{"{{check_in_date}}"}</code> - Check-in date</li>
+            <li><code>{"{{check_out_date}}"}</code> - Check-out date</li>
+            <li><code>{"{{property_name}}"}</code> - Property name</li>
+            <li><code>{"{{room_number}}"}</code> - Room number</li>
+            <li><code>{"{{booking_number}}"}</code> - Booking reference</li>
           </ul>
         </div>
       </div>
