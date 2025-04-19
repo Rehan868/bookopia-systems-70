@@ -191,7 +191,7 @@ export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => 
 };
 
 export const updateBookingStatus = async (id: string, status: string): Promise<void> => {
-  // Type assertion to ensure the status is of the correct type
+  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled" | "no-show";
   
   const { error } = await supabase
@@ -206,7 +206,7 @@ export const updateBookingStatus = async (id: string, status: string): Promise<v
 };
 
 export const updateRoomStatus = async (id: string, status: string): Promise<void> => {
-  // Type assertion to ensure the status is of the correct type
+  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "available" | "occupied" | "cleaning" | "maintenance" | "out-of-order";
   
   const { error } = await supabase
@@ -221,7 +221,7 @@ export const updateRoomStatus = async (id: string, status: string): Promise<void
 };
 
 export const updateCleaningTaskStatus = async (id: string, status: string): Promise<void> => {
-  // Type assertion to ensure the status is of the correct type
+  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "pending" | "in-progress" | "completed" | "verified" | "issues";
   
   const { error } = await supabase

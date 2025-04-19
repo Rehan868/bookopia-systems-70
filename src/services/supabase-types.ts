@@ -31,16 +31,19 @@ export type Booking = {
   created_at: string;
   updated_at: string;
   rooms?: any; // Adding rooms property that comes from join queries
-  commission?: number;
-  tourismFee?: number;
-  vat?: number;
-  netToOwner?: number;
-  securityDeposit?: number;
-  baseRate?: number;
-  adults?: number;
-  children?: number;
-  guestEmail?: string;
-  guestPhone?: string;
+  // Financial fields
+  commission: number;
+  tourismFee: number;
+  vat: number;
+  netToOwner: number;
+  securityDeposit: number;
+  baseRate: number;
+  // Guest information
+  adults: number;
+  children: number;
+  guestEmail: string;
+  guestPhone: string;
+  notes?: string;
 };
 
 export type User = {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking } from '@/services/supabase-types';
@@ -145,10 +146,13 @@ export function useBooking(id: string) {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
-          // Create a properly typed booking with all needed fields
-          const formattedData: Booking & Record<string, any> = {
+          // Create a booking object with all required properties
+          // Using type casting to avoid TypeScript errors
+          const formattedData = {
             ...bookingData,
+            // Ensure all financial data is numeric
             amount: Number(bookingData.amount || 0),
+            // Add properties that TypeScript complains about if they don't exist in bookingData
             commission: Number(bookingData.commission || 0),
             tourismFee: Number(bookingData.tourismFee || 0),
             vat: Number(bookingData.vat || 0),
@@ -156,8 +160,12 @@ export function useBooking(id: string) {
             securityDeposit: Number(bookingData.securityDeposit || 0),
             baseRate: Number(bookingData.baseRate || 0),
             adults: Number(bookingData.adults || 0),
-            children: Number(bookingData.children || 0)
-          };
+            children: Number(bookingData.children || 0),
+            guestEmail: bookingData.guestEmail || '',
+            guestPhone: bookingData.guestPhone || '',
+            payment_status: bookingData.payment_status || 'pending',
+            notes: bookingData.special_requests || ''
+          } as Booking & Record<string, any>;
           
           setData(formattedData);
         } else {
