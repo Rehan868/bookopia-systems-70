@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,6 +42,12 @@ import OwnerCleaningStatus from "./pages/OwnerCleaningStatus";
 import OwnerReports from "./pages/OwnerReports";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import PropertyAdd from "./pages/PropertyAdd";
+import PropertyEdit from "./pages/PropertyEdit";
+import RoomTypeAdd from "./pages/RoomTypeAdd";
+import RoomTypeEdit from "./pages/RoomTypeEdit";
+import EmailTemplates from "./pages/EmailTemplates";
+import SmsTemplates from "./pages/SmsTemplates";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +146,12 @@ const App = () => (
               <Route path="reports" element={<Reports />} />
               <Route path="audit" element={<AuditLogs />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="settings/properties/new" element={<PropertyAdd />} />
+              <Route path="settings/properties/edit/:id" element={<PropertyEdit />} />
+              <Route path="settings/room-types/new" element={<RoomTypeAdd />} />
+              <Route path="settings/room-types/edit/:id" element={<RoomTypeEdit />} />
+              <Route path="settings/email-templates" element={<EmailTemplates />} />
+              <Route path="settings/sms-templates" element={<SmsTemplates />} />
             </Route>
             
             <Route path="/owner" element={
