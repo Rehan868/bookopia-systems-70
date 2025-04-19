@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking } from '@/services/supabase-types';
@@ -13,7 +12,20 @@ const mockBookings = [
     check_out: '2023-06-18',
     status: 'confirmed',
     amount: 450,
-    rooms: { number: '101', property: 'Marina Tower' }
+    rooms: { number: '101', property: 'Marina Tower' },
+    commission: 45,
+    tourismFee: 13.5,
+    vat: 22.5,
+    netToOwner: 369,
+    securityDeposit: 100,
+    baseRate: 150,
+    adults: 2,
+    children: 0,
+    guestEmail: 'john.smith@example.com',
+    guestPhone: '+1 (555) 123-4567',
+    payment_status: 'paid',
+    amountPaid: 450,
+    pendingAmount: 0
   },
   {
     id: '2',
@@ -23,7 +35,20 @@ const mockBookings = [
     check_out: '2023-06-16',
     status: 'checked-in',
     amount: 350,
-    rooms: { number: '205', property: 'Downtown Heights' }
+    rooms: { number: '205', property: 'Downtown Heights' },
+    commission: 35,
+    tourismFee: 10.5,
+    vat: 18,
+    netToOwner: 295,
+    securityDeposit: 100,
+    baseRate: 150,
+    adults: 1,
+    children: 1,
+    guestEmail: 'emma.johnson@example.com',
+    guestPhone: '+1 (555) 987-6543',
+    payment_status: 'pending',
+    amountPaid: 350,
+    pendingAmount: 0
   },
   {
     id: '3',
@@ -33,7 +58,20 @@ const mockBookings = [
     check_out: '2023-06-13',
     status: 'checked-out',
     amount: 175,
-    rooms: { number: '304', property: 'Marina Tower' }
+    rooms: { number: '304', property: 'Marina Tower' },
+    commission: 17.5,
+    tourismFee: 5.25,
+    vat: 8.75,
+    netToOwner: 142.5,
+    securityDeposit: 100,
+    baseRate: 150,
+    adults: 1,
+    children: 0,
+    guestEmail: 'michael.chen@example.com',
+    guestPhone: '+1 (555) 555-1234',
+    payment_status: 'paid',
+    amountPaid: 175,
+    pendingAmount: 0
   },
   {
     id: '4',
@@ -43,7 +81,20 @@ const mockBookings = [
     check_out: '2023-06-20',
     status: 'confirmed',
     amount: 300,
-    rooms: { number: '102', property: 'Downtown Heights' }
+    rooms: { number: '102', property: 'Downtown Heights' },
+    commission: 30,
+    tourismFee: 9,
+    vat: 16.5,
+    netToOwner: 253.5,
+    securityDeposit: 100,
+    baseRate: 150,
+    adults: 2,
+    children: 0,
+    guestEmail: 'sarah.davis@example.com',
+    guestPhone: '+1 (555) 321-6543',
+    payment_status: 'pending',
+    amountPaid: 300,
+    pendingAmount: 0
   },
   {
     id: '5',
@@ -53,7 +104,20 @@ const mockBookings = [
     check_out: '2023-06-15',
     status: 'checked-out',
     amount: 625,
-    rooms: { number: '401', property: 'Marina Tower' }
+    rooms: { number: '401', property: 'Marina Tower' },
+    commission: 62.5,
+    tourismFee: 18.75,
+    vat: 31.25,
+    netToOwner: 521.25,
+    securityDeposit: 100,
+    baseRate: 150,
+    adults: 2,
+    children: 0,
+    guestEmail: 'david.wilson@example.com',
+    guestPhone: '+1 (555) 789-1234',
+    payment_status: 'paid',
+    amountPaid: 625,
+    pendingAmount: 0
   },
 ];
 
@@ -75,17 +139,35 @@ export function useBookings() {
         if (bookingsError) {
           console.warn('Error fetching from Supabase, using mock data:', bookingsError);
           // Fallback to mock data
-          setData(mockBookings);
+          setData(mockBookings as unknown as Booking[]);
         } else if (bookingsData && bookingsData.length > 0) {
-          setData(bookingsData);
+          // Transform the data to match our Booking type
+          const transformedData = bookingsData.map(booking => ({
+            ...booking,
+            commission: booking.commission || Number(booking.amount) * 0.1,
+            tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+            vat: booking.vat || Number(booking.amount) * 0.05,
+            netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+            securityDeposit: booking.securityDeposit || 100,
+            baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+            adults: booking.adults || 1,
+            children: booking.children || 0,
+            guestEmail: booking.guestEmail || '',
+            guestPhone: booking.guestPhone || '',
+            payment_status: booking.payment_status || 'pending',
+            amountPaid: booking.amountPaid || 0,
+            pendingAmount: booking.pendingAmount || booking.amount
+          })) as unknown as Booking[];
+          
+          setData(transformedData);
         } else {
           // If Supabase returns empty data, use mock data
-          setData(mockBookings);
+          setData(mockBookings as unknown as Booking[]);
         }
       } catch (err) {
         console.error('Error in useBookings:', err);
         setError(err);
-        setData(mockBookings); // Fallback to mock data on error
+        setData(mockBookings as unknown as Booking[]); // Fallback to mock data on error
       } finally {
         setIsLoading(false);
       }
@@ -138,34 +220,37 @@ export function useBooking(id: string) {
               guestEmail: 'guest@example.com',
               guestPhone: '+1 (555) 123-4567',
               special_requests: 'No special requests.',
-              payment_status: 'paid'
+              payment_status: 'paid',
+              amountPaid: booking.amount,
+              pendingAmount: 0
             };
             
-            setData({ ...booking, ...mockFinancialDetails });
+            setData({ ...booking, ...mockFinancialDetails } as unknown as Booking);
           } else {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
           // Create a booking object with all required properties
-          // Using type casting to avoid TypeScript errors
           const formattedData = {
             ...bookingData,
             // Ensure all financial data is numeric
             amount: Number(bookingData.amount || 0),
             // Add properties that TypeScript complains about if they don't exist in bookingData
-            commission: Number(bookingData.commission || 0),
-            tourismFee: Number(bookingData.tourismFee || 0),
-            vat: Number(bookingData.vat || 0),
-            netToOwner: Number(bookingData.netToOwner || 0),
-            securityDeposit: Number(bookingData.securityDeposit || 0),
-            baseRate: Number(bookingData.baseRate || 0),
-            adults: Number(bookingData.adults || 0),
+            commission: Number(bookingData.commission || bookingData.amount * 0.1),
+            tourismFee: Number(bookingData.tourismFee || bookingData.amount * 0.03),
+            vat: Number(bookingData.vat || bookingData.amount * 0.05),
+            netToOwner: Number(bookingData.netToOwner || bookingData.amount * 0.82),
+            securityDeposit: Number(bookingData.securityDeposit || 100),
+            baseRate: Number(bookingData.baseRate || bookingData.amount * 0.8),
+            adults: Number(bookingData.adults || 1),
             children: Number(bookingData.children || 0),
             guestEmail: bookingData.guestEmail || '',
             guestPhone: bookingData.guestPhone || '',
             payment_status: bookingData.payment_status || 'pending',
-            notes: bookingData.special_requests || ''
-          } as Booking & Record<string, any>;
+            notes: bookingData.special_requests || '',
+            amountPaid: Number(bookingData.amountPaid || 0),
+            pendingAmount: Number(bookingData.pendingAmount || bookingData.amount)
+          } as unknown as Booking;
           
           setData(formattedData);
         } else {
@@ -200,7 +285,7 @@ export function useTodayCheckins() {
           booking => booking.check_in.split('T')[0] === today && booking.status === 'confirmed'
         );
         
-        setData(checkins);
+        setData(checkins as unknown as Booking[]);
         setIsLoading(false);
       } catch (err) {
         setError(err);
@@ -229,7 +314,7 @@ export function useTodayCheckouts() {
           booking => booking.check_out.split('T')[0] === today && booking.status === 'checked-in'
         );
         
-        setData(checkouts);
+        setData(checkouts as unknown as Booking[]);
         setIsLoading(false);
       } catch (err) {
         setError(err);

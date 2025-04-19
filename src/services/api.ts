@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Room, 
@@ -72,7 +71,23 @@ export const fetchBookings = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  return data || [];
+  const transformedData = (data || []).map(booking => ({
+    ...booking,
+    commission: booking.commission || Number(booking.amount) * 0.1,
+    tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+    vat: booking.vat || Number(booking.amount) * 0.05,
+    netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+    securityDeposit: booking.securityDeposit || 100,
+    baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+    adults: booking.adults || 1,
+    children: booking.children || 0,
+    guestEmail: booking.guestEmail || '',
+    guestPhone: booking.guestPhone || '',
+    amountPaid: booking.amountPaid || 0,
+    pendingAmount: booking.pendingAmount || booking.amount
+  })) as unknown as Booking[];
+  
+  return transformedData;
 };
 
 export const fetchBookingById = async (id: string): Promise<Booking> => {
@@ -87,7 +102,23 @@ export const fetchBookingById = async (id: string): Promise<Booking> => {
     throw error;
   }
   
-  return data;
+  const formattedData = {
+    ...data,
+    commission: data.commission || Number(data.amount) * 0.1,
+    tourismFee: data.tourismFee || Number(data.amount) * 0.03,
+    vat: data.vat || Number(data.amount) * 0.05,
+    netToOwner: data.netToOwner || Number(data.amount) * 0.82,
+    securityDeposit: data.securityDeposit || 100,
+    baseRate: data.baseRate || Number(data.amount) * 0.8,
+    adults: data.adults || 1,
+    children: data.children || 0,
+    guestEmail: data.guestEmail || '',
+    guestPhone: data.guestPhone || '',
+    amountPaid: data.amountPaid || 0,
+    pendingAmount: data.pendingAmount || data.amount
+  } as unknown as Booking;
+  
+  return formattedData;
 };
 
 export const fetchTodayCheckins = async (): Promise<Booking[]> => {
@@ -104,7 +135,23 @@ export const fetchTodayCheckins = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  return data || [];
+  const transformedData = (data || []).map(booking => ({
+    ...booking,
+    commission: booking.commission || Number(booking.amount) * 0.1,
+    tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+    vat: booking.vat || Number(booking.amount) * 0.05,
+    netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+    securityDeposit: booking.securityDeposit || 100,
+    baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+    adults: booking.adults || 1,
+    children: booking.children || 0,
+    guestEmail: booking.guestEmail || '',
+    guestPhone: booking.guestPhone || '',
+    amountPaid: booking.amountPaid || 0,
+    pendingAmount: booking.pendingAmount || booking.amount
+  })) as unknown as Booking[];
+  
+  return transformedData;
 };
 
 export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
@@ -121,7 +168,23 @@ export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  return data || [];
+  const transformedData = (data || []).map(booking => ({
+    ...booking,
+    commission: booking.commission || Number(booking.amount) * 0.1,
+    tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+    vat: booking.vat || Number(booking.amount) * 0.05,
+    netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+    securityDeposit: booking.securityDeposit || 100,
+    baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+    adults: booking.adults || 1,
+    children: booking.children || 0,
+    guestEmail: booking.guestEmail || '',
+    guestPhone: booking.guestPhone || '',
+    amountPaid: booking.amountPaid || 0,
+    pendingAmount: booking.pendingAmount || booking.amount
+  })) as unknown as Booking[];
+  
+  return transformedData;
 };
 
 export const fetchUsers = async (): Promise<User[]> => {
@@ -191,7 +254,6 @@ export const fetchPropertyOwnership = async (): Promise<PropertyOwnership[]> => 
 };
 
 export const updateBookingStatus = async (id: string, status: string): Promise<void> => {
-  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled" | "no-show";
   
   const { error } = await supabase
@@ -206,7 +268,6 @@ export const updateBookingStatus = async (id: string, status: string): Promise<v
 };
 
 export const updateRoomStatus = async (id: string, status: string): Promise<void> => {
-  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "available" | "occupied" | "cleaning" | "maintenance" | "out-of-order";
   
   const { error } = await supabase
@@ -221,7 +282,6 @@ export const updateRoomStatus = async (id: string, status: string): Promise<void
 };
 
 export const updateCleaningTaskStatus = async (id: string, status: string): Promise<void> => {
-  // Using a type assertion to ensure the status is of the correct type
   const validStatus = status as "pending" | "in-progress" | "completed" | "verified" | "issues";
   
   const { error } = await supabase
