@@ -91,7 +91,7 @@ export function BookingDetails() {
               </div>
             </div>
 
-            {/* Display Guest Document */}
+            {/* Display Guest Document only if it exists */}
             {booking.guestDocument && (
               <div className="mt-4">
                 <h3 className="font-medium mb-2">Guest ID/Passport</h3>

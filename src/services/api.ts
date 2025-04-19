@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Room, 
@@ -86,6 +85,7 @@ export const fetchBookings = async (): Promise<Booking[]> => {
       children: booking.children || 0,
       guestEmail: booking.guestEmail || '',
       guestPhone: booking.guestPhone || '',
+      guestDocument: booking.guestDocument || '',
       amountPaid: booking.amountPaid || 0,
       pendingAmount: booking.pendingAmount || booking.amount
     };
@@ -120,6 +120,7 @@ export const fetchBookingById = async (id: string): Promise<Booking> => {
     children: data.children || 0,
     guestEmail: data.guestEmail || '',
     guestPhone: data.guestPhone || '',
+    guestDocument: data.guestDocument || '',
     amountPaid: data.amountPaid || 0,
     pendingAmount: data.pendingAmount || data.amount
   } as unknown as Booking;
@@ -153,6 +154,7 @@ export const fetchTodayCheckins = async (): Promise<Booking[]> => {
     children: booking.children || 0,
     guestEmail: booking.guestEmail || '',
     guestPhone: booking.guestPhone || '',
+    guestDocument: booking.guestDocument || '',
     amountPaid: booking.amountPaid || 0,
     pendingAmount: booking.pendingAmount || booking.amount
   })) as unknown as Booking[];
@@ -186,6 +188,7 @@ export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
     children: booking.children || 0,
     guestEmail: booking.guestEmail || '',
     guestPhone: booking.guestPhone || '',
+    guestDocument: booking.guestDocument || '',
     amountPaid: booking.amountPaid || 0,
     pendingAmount: booking.pendingAmount || booking.amount
   })) as unknown as Booking[];

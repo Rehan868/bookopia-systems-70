@@ -1,8 +1,4 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Booking } from '@/services/supabase-types';
-
 // Mock data for bookings
 const mockBookings = [
   {
@@ -142,6 +138,19 @@ type BookingDataFromDB = {
   updated_at?: string;
   payment_status?: string;
   rooms?: { number: string; property: string };
+  // Add all the additional fields that we might be calculating or setting defaults for
+  commission?: number;
+  tourismFee?: number;
+  vat?: number;
+  netToOwner?: number;
+  securityDeposit?: number;
+  baseRate?: number;
+  guestEmail?: string;
+  guestPhone?: string;
+  guestDocument?: string;
+  notes?: string;
+  amountPaid?: number;
+  pendingAmount?: number;
 };
 
 export function useBookings() {
@@ -245,6 +254,7 @@ export function useBooking(id: string) {
               securityDeposit: 100,
               guestEmail: 'guest@example.com',
               guestPhone: '+1 (555) 123-4567',
+              guestDocument: 'passport-123.pdf',
               special_requests: 'No special requests.',
               payment_status: 'paid',
               amountPaid: booking.amount,
@@ -272,6 +282,7 @@ export function useBooking(id: string) {
             children: Number(bookingData.children || 0),
             guestEmail: bookingData.guestEmail || '',
             guestPhone: bookingData.guestPhone || '',
+            guestDocument: bookingData.guestDocument || '',
             payment_status: bookingData.payment_status || 'pending',
             notes: bookingData.special_requests || '',
             amountPaid: Number(bookingData.amountPaid || 0),

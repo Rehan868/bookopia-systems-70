@@ -1,3 +1,4 @@
+
 export type Room = {
   id: string;
   number: string;
@@ -43,6 +44,7 @@ export type Booking = {
   children: number;
   guestEmail: string;
   guestPhone: string;
+  guestDocument?: string; // Adding guestDocument field for passport/ID document
   notes?: string;
   amountPaid: number;
   pendingAmount: number;
