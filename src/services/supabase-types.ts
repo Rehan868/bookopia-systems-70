@@ -44,6 +44,8 @@ export type Booking = {
   guestEmail: string;
   guestPhone: string;
   notes?: string;
+  amountPaid: number;
+  pendingAmount: number;
 };
 
 export type User = {

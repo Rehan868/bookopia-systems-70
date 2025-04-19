@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -39,6 +38,8 @@ interface BookingFormData {
   paymentStatus: string;
   sendConfirmation: boolean;
   guestDocument?: File | null;
+  amountPaid: number;
+  pendingAmount: number;
 }
 
 interface AddEditBookingFormProps {
@@ -82,7 +83,9 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     status: bookingData?.status || 'confirmed',
     paymentStatus: bookingData?.paymentStatus || 'pending',
     sendConfirmation: bookingData?.sendConfirmation !== undefined ? bookingData.sendConfirmation : true,
-    guestDocument: null
+    guestDocument: null,
+    amountPaid: bookingData?.amountPaid || 0,
+    pendingAmount: 0, // This will be calculated
   };
   
   const [formData, setFormData] = useState<BookingFormData>(defaultData);
@@ -197,6 +200,15 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
     const num = ensureNumber(value);
     return num.toFixed(2);
   };
+
+  useEffect(() => {
+    const total = formData.totalAmount + formData.securityDeposit;
+    const pending = total - formData.amountPaid;
+    setFormData(prev => ({
+      ...prev,
+      pendingAmount: pending
+    }));
+  }, [formData.totalAmount, formData.securityDeposit, formData.amountPaid]);
   
   return (
     <div className="animate-fade-in">
@@ -494,7 +506,7 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
           <Card>
             <CardHeader>
               <CardTitle>Financial Details</CardTitle>
-              <CardDescription>Breakdown of costs and fees</CardDescription>
+              <CardDescription>Payment information and calculations</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -511,20 +523,6 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="totalAmount">Total Amount*</Label>
-                <Input
-                  id="totalAmount"
-                  name="totalAmount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.totalAmount}
-                  onChange={handleNumberChange}
-                  required
-                />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="commission">Commission*</Label>
                 <Input
@@ -592,6 +590,32 @@ export function AddEditBookingForm({ mode, bookingData }: AddEditBookingFormProp
                   value={formData.securityDeposit}
                   onChange={handleNumberChange}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="amountPaid">Amount Paid by Guest</Label>
+                <Input
+                  id="amountPaid"
+                  name="amountPaid"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.amountPaid}
+                  onChange={handleNumberChange}
+                />
+              </div>
+
+              <div className="border-t pt-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                    <p className="text-lg font-semibold">${formatNumber(formData.totalAmount + formData.securityDeposit)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Pending Amount</p>
+                    <p className="text-lg font-semibold text-red-600">${formatNumber(formData.pendingAmount)}</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

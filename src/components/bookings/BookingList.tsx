@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +15,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import { CreditCard, Trash2, FileText } from 'lucide-react';
 
 function formatDate(dateString: string) {
   try {
@@ -60,12 +60,10 @@ export function BookingList({
   const { data: bookings, isLoading, error } = useBookings();
   const { toast } = useToast();
 
-  // Apply filters to bookings
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
     
     return bookings.filter(booking => {
-      // Apply search filter
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = 
         !searchQuery || 
@@ -74,10 +72,8 @@ export function BookingList({
         (booking.rooms as any)?.number?.toLowerCase().includes(searchLower) ||
         (booking.rooms as any)?.property?.toLowerCase().includes(searchLower);
       
-      // Apply status filter
       const matchesStatus = filterValue === 'all' || booking.status === filterValue;
       
-      // Apply date filter
       let matchesDate = true;
       if (dateRange?.from) {
         const bookingCheckIn = new Date(booking.check_in);
@@ -85,7 +81,6 @@ export function BookingList({
         const filterFrom = dateRange.from;
         const filterTo = dateRange.to || dateRange.from;
 
-        // Check if the booking dates overlap with the filter dates
         matchesDate = 
           (bookingCheckIn <= filterTo && 
           (dateRange.to ? bookingCheckOut >= filterFrom : true));
@@ -175,18 +170,29 @@ export function BookingList({
                             <DropdownMenuItem asChild>
                               <Link to={`/bookings/${booking.id}`}>View Details</Link>
                             </DropdownMenuItem>
-                            {booking.status === 'confirmed' && (
-                              <DropdownMenuItem asChild>
-                                <Link to={`/bookings/${booking.id}`}>Check In</Link>
-                              </DropdownMenuItem>
-                            )}
-                            {booking.status === 'checked-in' && (
-                              <DropdownMenuItem asChild>
-                                <Link to={`/bookings/${booking.id}`}>Check Out</Link>
-                              </DropdownMenuItem>
-                            )}
                             <DropdownMenuItem asChild>
-                              <Link to={`/bookings/edit/${booking.id}`}>Edit</Link>
+                              <Link to={`/bookings/edit/${booking.id}`}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              Update Payment
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Download PDF
+                            </DropdownMenuItem>
+                            {booking.status === 'checked-in' && (
+                              <DropdownMenuItem>
+                                Check Out
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
