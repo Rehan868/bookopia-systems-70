@@ -122,8 +122,8 @@ const mockBookings = [
   },
 ];
 
-// Define a BookingDataFromDB type to represent what we get from Supabase
-type BookingDataFromDB = {
+// Define a more complete type for what we get from Supabase
+interface BookingDataFromDB {
   id: string;
   booking_number: string;
   guest_name: string;
@@ -131,8 +131,8 @@ type BookingDataFromDB = {
   check_out: string;
   status: string;
   amount: number;
-  adults: number;
-  children: number;
+  adults?: number;
+  children?: number;
   room_id?: string;
   property_id?: string;
   special_requests?: string | null;
@@ -142,7 +142,7 @@ type BookingDataFromDB = {
   updated_at?: string;
   payment_status?: string;
   rooms?: { number: string; property: string };
-  // Add all the additional fields that we might be calculating or setting defaults for
+  // These are the custom fields that we calculate or set defaults for
   commission?: number;
   tourismFee?: number;
   vat?: number;
@@ -155,7 +155,35 @@ type BookingDataFromDB = {
   notes?: string;
   amountPaid?: number;
   pendingAmount?: number;
-};
+}
+
+// Helper function to properly enhance a booking with calculated fields
+function enhanceBooking(booking: BookingDataFromDB): Booking {
+  const amount = Number(booking.amount || 0);
+  
+  return {
+    ...booking,
+    commission: booking.commission !== undefined ? booking.commission : amount * 0.1,
+    tourismFee: booking.tourismFee !== undefined ? booking.tourismFee : amount * 0.03,
+    vat: booking.vat !== undefined ? booking.vat : amount * 0.05,
+    netToOwner: booking.netToOwner !== undefined ? booking.netToOwner : amount * 0.82,
+    securityDeposit: booking.securityDeposit !== undefined ? booking.securityDeposit : 100,
+    baseRate: booking.baseRate !== undefined ? booking.baseRate : amount * 0.8,
+    adults: booking.adults !== undefined ? booking.adults : 1,
+    children: booking.children !== undefined ? booking.children : 0,
+    guestEmail: booking.guestEmail || '',
+    guestPhone: booking.guestPhone || '',
+    guestDocument: booking.guestDocument || '',
+    payment_status: booking.payment_status || 'pending',
+    amountPaid: booking.amountPaid !== undefined ? booking.amountPaid : 0,
+    pendingAmount: booking.pendingAmount !== undefined ? booking.pendingAmount : amount,
+    // Ensure all required Booking type fields are present
+    room_id: booking.room_id || '',
+    special_requests: booking.special_requests || null,
+    created_at: booking.created_at || new Date().toISOString(),
+    updated_at: booking.updated_at || new Date().toISOString()
+  } as Booking;
+}
 
 export function useBookings() {
   const [data, setData] = useState<Booking[] | null>(null);
@@ -177,29 +205,10 @@ export function useBookings() {
           // Fallback to mock data
           setData(mockBookings as unknown as Booking[]);
         } else if (bookingsData && bookingsData.length > 0) {
-          // Transform the data to match our Booking type
-          const transformedData = bookingsData.map((booking: BookingDataFromDB) => {
-            // Calculate derived fields or use defaults if they don't exist
-            const enhancedBooking = {
-              ...booking,
-              commission: booking.commission || Number(booking.amount) * 0.1,
-              tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-              vat: booking.vat || Number(booking.amount) * 0.05,
-              netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-              securityDeposit: booking.securityDeposit || 100,
-              baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-              adults: booking.adults || 1,
-              children: booking.children || 0,
-              guestEmail: booking.guestEmail || '',
-              guestPhone: booking.guestPhone || '',
-              guestDocument: booking.guestDocument || '',
-              payment_status: booking.payment_status || 'pending',
-              amountPaid: booking.amountPaid || 0,
-              pendingAmount: booking.pendingAmount || booking.amount
-            };
-            
-            return enhancedBooking as unknown as Booking;
-          });
+          // Transform the data to match our Booking type using the enhanceBooking function
+          const transformedData = bookingsData.map((booking: BookingDataFromDB) => 
+            enhanceBooking(booking)
+          );
           
           setData(transformedData);
         } else {
@@ -251,52 +260,14 @@ export function useBooking(id: string) {
           const booking = mockBookings.find(booking => booking.id === id);
           
           if (booking) {
-            // Add financial details for the mock data
-            const mockFinancialDetails = {
-              baseRate: 150,
-              commission: Number(booking.amount) * 0.1,
-              tourismFee: Number(booking.amount) * 0.03,
-              vat: Number(booking.amount) * 0.05,
-              netToOwner: Number(booking.amount) * 0.82,
-              securityDeposit: 100,
-              guestEmail: 'guest@example.com',
-              guestPhone: '+1 (555) 123-4567',
-              guestDocument: 'passport-123.pdf',
-              special_requests: 'No special requests.',
-              payment_status: 'paid',
-              amountPaid: booking.amount,
-              pendingAmount: 0
-            };
-            
-            setData({ ...booking, ...mockFinancialDetails } as unknown as Booking);
+            setData(booking as unknown as Booking);
           } else {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
-          // Create an enhanced version of the booking data with all required fields
-          const enhancedBooking = {
-            ...bookingData,
-            // Ensure all financial data is numeric
-            amount: Number(bookingData.amount || 0),
-            // Add properties with proper type assertion
-            commission: Number(bookingData.commission || bookingData.amount * 0.1),
-            tourismFee: Number(bookingData.tourismFee || bookingData.amount * 0.03),
-            vat: Number(bookingData.vat || bookingData.amount * 0.05),
-            netToOwner: Number(bookingData.netToOwner || bookingData.amount * 0.82),
-            securityDeposit: Number(bookingData.securityDeposit || 100),
-            baseRate: Number(bookingData.baseRate || bookingData.amount * 0.8),
-            adults: Number(bookingData.adults || 1),
-            children: Number(bookingData.children || 0),
-            guestEmail: bookingData.guestEmail || '',
-            guestPhone: bookingData.guestPhone || '',
-            guestDocument: bookingData.guestDocument || '',
-            payment_status: bookingData.payment_status || 'pending',
-            notes: bookingData.special_requests || '',
-            amountPaid: Number(bookingData.amountPaid || 0),
-            pendingAmount: Number(bookingData.pendingAmount || bookingData.amount)
-          };
-          
-          setData(enhancedBooking as unknown as Booking);
+          // Use the enhanceBooking helper to properly format the data
+          const enhancedBooking = enhanceBooking(bookingData as BookingDataFromDB);
+          setData(enhancedBooking);
         } else {
           throw new Error('Booking not found');
         }

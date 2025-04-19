@@ -9,6 +9,29 @@ import {
   PropertyOwnership
 } from './supabase-types';
 
+// Helper function to enhance a booking with calculated fields
+function enhanceBooking(booking: any): Booking {
+  const amount = Number(booking.amount || 0);
+  
+  return {
+    ...booking,
+    commission: booking.commission !== undefined ? booking.commission : amount * 0.1,
+    tourismFee: booking.tourismFee !== undefined ? booking.tourismFee : amount * 0.03,
+    vat: booking.vat !== undefined ? booking.vat : amount * 0.05,
+    netToOwner: booking.netToOwner !== undefined ? booking.netToOwner : amount * 0.82,
+    securityDeposit: booking.securityDeposit !== undefined ? booking.securityDeposit : 100,
+    baseRate: booking.baseRate !== undefined ? booking.baseRate : amount * 0.8,
+    adults: booking.adults !== undefined ? booking.adults : 1,
+    children: booking.children !== undefined ? booking.children : 0,
+    guestEmail: booking.guestEmail || '',
+    guestPhone: booking.guestPhone || '',
+    guestDocument: booking.guestDocument || '',
+    payment_status: booking.payment_status || 'pending',
+    amountPaid: booking.amountPaid !== undefined ? booking.amountPaid : 0,
+    pendingAmount: booking.pendingAmount !== undefined ? booking.pendingAmount : amount
+  } as Booking;
+}
+
 export const fetchRooms = async (): Promise<Room[]> => {
   const { data, error } = await supabase
     .from('rooms')
@@ -71,25 +94,7 @@ export const fetchBookings = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  const transformedData = (data || []).map(booking => {
-    const enhancedBooking = {
-      ...booking,
-      commission: booking.commission || Number(booking.amount) * 0.1,
-      tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-      vat: booking.vat || Number(booking.amount) * 0.05,
-      netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-      securityDeposit: booking.securityDeposit || 100,
-      baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-      adults: booking.adults || 1,
-      children: booking.children || 0,
-      guestEmail: booking.guestEmail || '',
-      guestPhone: booking.guestPhone || '',
-      guestDocument: booking.guestDocument || '',
-      amountPaid: booking.amountPaid || 0,
-      pendingAmount: booking.pendingAmount || booking.amount
-    };
-    return enhancedBooking as unknown as Booking;
-  });
+  const transformedData = (data || []).map(booking => enhanceBooking(booking));
   
   return transformedData;
 };
@@ -106,24 +111,7 @@ export const fetchBookingById = async (id: string): Promise<Booking> => {
     throw error;
   }
   
-  const formattedData = {
-    ...data,
-    commission: data.commission || Number(data.amount) * 0.1,
-    tourismFee: data.tourismFee || Number(data.amount) * 0.03,
-    vat: data.vat || Number(data.amount) * 0.05,
-    netToOwner: data.netToOwner || Number(data.amount) * 0.82,
-    securityDeposit: data.securityDeposit || 100,
-    baseRate: data.baseRate || Number(data.amount) * 0.8,
-    adults: data.adults || 1,
-    children: data.children || 0,
-    guestEmail: data.guestEmail || '',
-    guestPhone: data.guestPhone || '',
-    guestDocument: data.guestDocument || '',
-    amountPaid: data.amountPaid || 0,
-    pendingAmount: data.pendingAmount || data.amount
-  } as unknown as Booking;
-  
-  return formattedData;
+  return enhanceBooking(data);
 };
 
 export const fetchTodayCheckins = async (): Promise<Booking[]> => {
@@ -140,25 +128,7 @@ export const fetchTodayCheckins = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  const transformedData = (data || []).map(booking => {
-    const enhancedBooking = {
-      ...booking,
-      commission: booking.commission || Number(booking.amount) * 0.1,
-      tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-      vat: booking.vat || Number(booking.amount) * 0.05,
-      netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-      securityDeposit: booking.securityDeposit || 100,
-      baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-      adults: booking.adults || 1,
-      children: booking.children || 0,
-      guestEmail: booking.guestEmail || '',
-      guestPhone: booking.guestPhone || '',
-      guestDocument: booking.guestDocument || '',
-      amountPaid: booking.amountPaid || 0,
-      pendingAmount: booking.pendingAmount || booking.amount
-    };
-    return enhancedBooking as unknown as Booking;
-  });
+  const transformedData = (data || []).map(booking => enhanceBooking(booking));
   
   return transformedData;
 };
@@ -177,25 +147,7 @@ export const fetchTodayCheckouts = async (): Promise<Booking[]> => {
     throw error;
   }
   
-  const transformedData = (data || []).map(booking => {
-    const enhancedBooking = {
-      ...booking,
-      commission: booking.commission || Number(booking.amount) * 0.1,
-      tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-      vat: booking.vat || Number(booking.amount) * 0.05,
-      netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-      securityDeposit: booking.securityDeposit || 100,
-      baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-      adults: booking.adults || 1,
-      children: booking.children || 0,
-      guestEmail: booking.guestEmail || '',
-      guestPhone: booking.guestPhone || '',
-      guestDocument: booking.guestDocument || '',
-      amountPaid: booking.amountPaid || 0,
-      pendingAmount: booking.pendingAmount || booking.amount
-    };
-    return enhancedBooking as unknown as Booking;
-  });
+  const transformedData = (data || []).map(booking => enhanceBooking(booking));
   
   return transformedData;
 };
