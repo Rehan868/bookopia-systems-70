@@ -134,13 +134,17 @@ export function BookingList({
                 <th className="text-left font-medium px-6 py-3">Check In</th>
                 <th className="text-left font-medium px-6 py-3">Check Out</th>
                 <th className="text-left font-medium px-6 py-3">Status</th>
-                <th className="text-left font-medium px-6 py-3">Amount</th>
+                <th className="text-left font-medium px-6 py-3">Total Amount</th>
+                <th className="text-left font-medium px-6 py-3">Amount Paid</th>
+                <th className="text-left font-medium px-6 py-3">Remaining</th>
+                <th className="text-left font-medium px-6 py-3">Created By</th>
                 <th className="text-left font-medium px-6 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filteredBookings.map((booking) => {
                 const room = booking.rooms as any;
+                const remainingAmount = booking.amount - (booking.amountPaid || 0);
                 return (
                   <tr key={booking.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-6 py-4">
@@ -154,6 +158,9 @@ export function BookingList({
                     <td className="px-6 py-4">{formatDate(booking.check_out)}</td>
                     <td className="px-6 py-4">{getStatusBadge(booking.status)}</td>
                     <td className="px-6 py-4">${booking.amount}</td>
+                    <td className="px-6 py-4">${booking.amountPaid || 0}</td>
+                    <td className="px-6 py-4 text-muted-foreground">${remainingAmount}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{booking.created_by || 'System'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <Button size="sm" variant="ghost" asChild>
@@ -204,7 +211,7 @@ export function BookingList({
               })}
               {(!filteredBookings || filteredBookings.length === 0) && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan={11} className="px-6 py-8 text-center text-muted-foreground">
                     No bookings found
                   </td>
                 </tr>
@@ -216,6 +223,7 @@ export function BookingList({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBookings.map((booking) => {
             const room = booking.rooms as any;
+            const remainingAmount = booking.amount - (booking.amountPaid || 0);
             return (
               <Card key={booking.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 <div className="p-6">
@@ -232,7 +240,7 @@ export function BookingList({
                       </div>
                       {getStatusBadge(booking.status)}
                     </div>
-                      
+                    
                     <div className="border-t pt-4 mt-1 space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-muted rounded-md">
@@ -254,13 +262,22 @@ export function BookingList({
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-muted rounded-md">
-                          <div className="font-semibold text-xs text-muted-foreground">$</div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Total Amount:</span>
+                          <span className="font-medium">${booking.amount}</span>
                         </div>
-                        <div>
-                          <p className="text-xs font-medium text-muted-foreground">AMOUNT</p>
-                          <p className="text-sm">${booking.amount}</p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Amount Paid:</span>
+                          <span className="font-medium">${booking.amountPaid || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Remaining:</span>
+                          <span className="font-medium">${remainingAmount}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Created By:</span>
+                          <span className="font-medium">{booking.created_by || 'System'}</span>
                         </div>
                       </div>
                     </div>
