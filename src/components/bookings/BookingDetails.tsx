@@ -38,6 +38,12 @@ export function BookingDetails() {
     );
   }
 
+  // Helper function to safely display numeric values
+  const formatNumber = (value: any) => {
+    const num = Number(value);
+    return isNaN(num) ? '0.00' : num.toFixed(2);
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-8">
@@ -119,7 +125,7 @@ export function BookingDetails() {
                 <div className="text-right font-medium">{booking.check_out}</div>
                 <div>Guests</div>
                 <div className="text-right font-medium">
-                  {(booking.adults || 0) + (booking.children || 0)} ({booking.adults || 0} adults, {booking.children || 0} children)
+                  {Number(booking.adults || 0) + Number(booking.children || 0)} ({Number(booking.adults || 0)} adults, {Number(booking.children || 0)} children)
                 </div>
               </div>
             </div>
@@ -127,15 +133,15 @@ export function BookingDetails() {
             <div className="space-y-3 pt-3 border-t">
               <div className="flex justify-between text-sm">
                 <span>Base Rate:</span>
-                <span>${booking.baseRate?.toFixed(2) || '0.00'}</span>
+                <span>${formatNumber(booking.baseRate)}</span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total Amount:</span>
-                <span>${booking.amount?.toFixed(2) || '0.00'}</span>
+                <span>${formatNumber(booking.amount)}</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Security Deposit:</span>
-                <span>${booking.securityDeposit?.toFixed(2) || '0.00'}</span>
+                <span>${formatNumber(booking.securityDeposit)}</span>
               </div>
             </div>
           </CardContent>
@@ -170,19 +176,19 @@ export function BookingDetails() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <h3 className="font-medium">Commission</h3>
-              <p className="text-muted-foreground">${booking.commission?.toFixed(2) || '0.00'}</p>
+              <p className="text-muted-foreground">${formatNumber(booking.commission)}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium">Tourism Fee</h3>
-              <p className="text-muted-foreground">${booking.tourismFee?.toFixed(2) || '0.00'}</p>
+              <p className="text-muted-foreground">${formatNumber(booking.tourismFee)}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium">VAT</h3>
-              <p className="text-muted-foreground">${booking.vat?.toFixed(2) || '0.00'}</p>
+              <p className="text-muted-foreground">${formatNumber(booking.vat)}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium">Net To Owner</h3>
-              <p className="text-muted-foreground">${booking.netToOwner?.toFixed(2) || '0.00'}</p>
+              <p className="text-muted-foreground">${formatNumber(booking.netToOwner)}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium">Payment Status</h3>
