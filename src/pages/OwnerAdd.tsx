@@ -15,6 +15,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { useRooms } from '@/hooks/useRooms';
+import { SearchAndFilter } from '@/components/ui/SearchAndFilter';
+import { Checkbox } from "@/components/ui/checkbox"
 
 type OwnerFormData = {
   firstName: string;
@@ -71,6 +74,24 @@ const OwnerAdd = () => {
     notes: '',
     citizenship: '',
   });
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const { data: rooms, isLoading } = useRooms();
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  
+  const filteredRooms = rooms?.filter(room => 
+    room.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    room.property.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleRoomSelect = (roomId: string) => {
+    setSelectedRooms(prev => {
+      if (prev.includes(roomId)) {
+        return prev.filter(id => id !== roomId);
+      }
+      return [...prev, roomId];
+    });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -556,19 +577,53 @@ const OwnerAdd = () => {
           <TabsContent value="properties">
             <Card>
               <CardHeader>
-                <CardTitle>Properties</CardTitle>
-                <CardDescription>Add properties for this owner</CardDescription>
+                <CardTitle>Assigned Rooms</CardTitle>
+                <CardDescription>Select rooms to assign to this owner</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <h3 className="font-medium text-lg mb-2">No Properties Yet</h3>
-                  <p className="text-muted-foreground mb-6">
-                    You can add properties after creating the owner account
-                  </p>
-                  <Button type="button" variant="outline" disabled>
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Add Property
-                  </Button>
+                <div className="space-y-6">
+                  <SearchAndFilter
+                    searchPlaceholder="Search rooms by number or property..."
+                    onSearch={setSearchQuery}
+                    onFilter={() => {}}
+                    onClearFilters={() => setSearchQuery('')}
+                  />
+                  
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Loading rooms...</p>
+                    </div>
+                  ) : filteredRooms && filteredRooms.length > 0 ? (
+                    <div className="grid gap-4">
+                      {filteredRooms.map((room) => (
+                        <div
+                          key={room.id}
+                          className={cn(
+                            "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors",
+                            selectedRooms.includes(room.id) 
+                              ? "border-primary bg-primary/5" 
+                              : "hover:bg-accent"
+                          )}
+                          onClick={() => handleRoomSelect(room.id)}
+                        >
+                          <div>
+                            <h4 className="font-medium">Room {room.number}</h4>
+                            <p className="text-sm text-muted-foreground">{room.property}</p>
+                          </div>
+                          <Checkbox
+                            checked={selectedRooms.includes(room.id)}
+                            onCheckedChange={() => handleRoomSelect(room.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">
+                        {searchQuery ? "No rooms found matching your search" : "No rooms available"}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
