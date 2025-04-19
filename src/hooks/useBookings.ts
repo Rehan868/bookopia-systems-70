@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking } from '@/services/supabase-types';
@@ -121,8 +122,30 @@ const mockBookings = [
   },
 ];
 
+// Define a BookingDataFromDB type to represent what we get from Supabase
+type BookingDataFromDB = {
+  id: string;
+  booking_number: string;
+  guest_name: string;
+  check_in: string;
+  check_out: string;
+  status: string;
+  amount: number;
+  adults: number;
+  children: number;
+  room_id?: string;
+  property_id?: string;
+  special_requests?: string | null;
+  created_at?: string;
+  created_by?: string;
+  guest_id?: string;
+  updated_at?: string;
+  payment_status?: string;
+  rooms?: { number: string; property: string };
+};
+
 export function useBookings() {
-  const [data, setData] = useState<any[] | null>(null);
+  const [data, setData] = useState<Booking[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -142,22 +165,25 @@ export function useBookings() {
           setData(mockBookings as unknown as Booking[]);
         } else if (bookingsData && bookingsData.length > 0) {
           // Transform the data to match our Booking type
-          const transformedData = bookingsData.map(booking => ({
-            ...booking,
-            commission: booking.commission || Number(booking.amount) * 0.1,
-            tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
-            vat: booking.vat || Number(booking.amount) * 0.05,
-            netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
-            securityDeposit: booking.securityDeposit || 100,
-            baseRate: booking.baseRate || Number(booking.amount) * 0.8,
-            adults: booking.adults || 1,
-            children: booking.children || 0,
-            guestEmail: booking.guestEmail || '',
-            guestPhone: booking.guestPhone || '',
-            payment_status: booking.payment_status || 'pending',
-            amountPaid: booking.amountPaid || 0,
-            pendingAmount: booking.pendingAmount || booking.amount
-          })) as unknown as Booking[];
+          const transformedData = bookingsData.map((booking: BookingDataFromDB) => {
+            // Calculate derived fields or use defaults if they don't exist
+            return {
+              ...booking,
+              commission: booking.commission || Number(booking.amount) * 0.1,
+              tourismFee: booking.tourismFee || Number(booking.amount) * 0.03,
+              vat: booking.vat || Number(booking.amount) * 0.05,
+              netToOwner: booking.netToOwner || Number(booking.amount) * 0.82,
+              securityDeposit: booking.securityDeposit || 100,
+              baseRate: booking.baseRate || Number(booking.amount) * 0.8,
+              adults: booking.adults || 1,
+              children: booking.children || 0,
+              guestEmail: booking.guestEmail || '',
+              guestPhone: booking.guestPhone || '',
+              payment_status: booking.payment_status || 'pending',
+              amountPaid: booking.amountPaid || 0,
+              pendingAmount: booking.pendingAmount || booking.amount
+            } as unknown as Booking;
+          });
           
           setData(transformedData);
         } else {
@@ -181,7 +207,7 @@ export function useBookings() {
 
 // Hook for individual booking data
 export function useBooking(id: string) {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -230,7 +256,7 @@ export function useBooking(id: string) {
             throw new Error('Booking not found');
           }
         } else if (bookingData) {
-          // Create a booking object with all required properties
+          // Cast the bookingData to the BookingDataFromDB type
           const formattedData = {
             ...bookingData,
             // Ensure all financial data is numeric

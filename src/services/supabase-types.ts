@@ -46,6 +46,10 @@ export type Booking = {
   notes?: string;
   amountPaid: number;
   pendingAmount: number;
+  // Other fields from the database
+  property_id?: string;
+  guest_id?: string;
+  created_by?: string;
 };
 
 export type User = {
